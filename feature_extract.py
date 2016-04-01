@@ -61,8 +61,34 @@ def get_rakeweight_data(doc):
       cur_vec[word] = float(degree)/float(freq)
     data[i,:] = np.array(cur_vec.values())
 
+
+  # TODO: Hey Joce, I'm hoping this all_tokens is an array and the data[i][j] would correspond to the jth token in all_tokens
+  # anyway we should figure this out tmr!
   return all_tokens, data
 
+# counts how many times each token is used as noun/verb/adj...
+def pos_count(list_sentences, tokens):
+  pos_dict = {}
+  for tok in tokens:
+    pos_dict[tok] = {'NN':0, 'VB':0, 'JJ':0}
+  for sent in list_sentences:
+    tokenized = word_tokenize(sent)
+    pos_tok = nltk.pos_tag(tokenized)
+    for tok, pos in pos_tok
+      if 'NN' in pos
+        pos_tok[tok]['NN'] +=1
+      if 'JJ' in pos
+        pos_tok[tok]['JJ'] += 1
+      if 'VRB' in pos
+        pos_tok[tok]['VRB'] += 1
+  return pos_dict
+
+def pos_reweight(noun_weight, verb_weight, adj_weight, data, pos_dict):
+  for tok in tokens:
+    # find which position tok is used most
+    max_pos = max(pos_dict, key=pos_dict.get)
+    # readjust weight based on max_pos, but need to agree on the form of data
+    # .. a few lines of code to finish this function! should be easy
 
 def main():
   nltk.data.path.append('/home/jocelyn/usb/nltk_data')
