@@ -61,7 +61,7 @@ def get_rakeweight_data(doc):
       cur_vec[word] = float(degree)/float(freq)
     data[i,:] = np.array(cur_vec.values())
 
-  return data
+  return all_tokens, data
 
 
 def main():
@@ -73,7 +73,7 @@ def main():
       continue
     f = open(semeval_dir + filename, 'r')
     content = f.read()
-    data = get_rakeweight_data(content)
+    tokens, data = get_rakeweight_data(content)
     # do something with data
     break
 
