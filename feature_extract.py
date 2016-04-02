@@ -8,13 +8,16 @@ from nltk.tokenize.api import StringTokenizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.tokenize.punkt import PunktSentenceTokenizer
+from collections import defaultdict
 import nltk.data
 import copy
 
 def get_rakeweight_data(doc):
 
+  content = doc.lower()
+
   # replace non-ascii and newline characters with space
-  content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in doc])
+  content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in content])
 
   # return pretrained sentence tokenizer
   sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
@@ -30,8 +33,9 @@ def get_rakeweight_data(doc):
       not in stopwords.words('english')) )) for sent in sentences]
 
   # stem tokens
-  stemmer = EnglishStemmer()
-  sentences = [list(stemmer.stem(t) for t in sent) for sent in sentences]
+  # dont stem for now
+#  stemmer = EnglishStemmer()
+#  sentences = [list(stemmer.stem(t) for t in sent) for sent in sentences]
 
   # get list of all tokens
   all_tokens = [t for sent in sentences for t in sent]
@@ -42,7 +46,10 @@ def get_rakeweight_data(doc):
   # ---- replace rakeweight with differenct weighting scheme ----
 
   # construct co-occurrence matrix
-  C = dict.fromkeys(all_tokens, dict.fromkeys(all_tokens, 0))
+  C = dict.fromkeys(all_tokens, 0)
+  for t in all_tokens:
+    C[t] = defaultdict(int)
+  prev = 0
   for sent in sentences:
     for word1 in sorted(sent):
       for word2 in sorted(sent):
@@ -52,18 +59,24 @@ def get_rakeweight_data(doc):
   data = np.zeros((len(sentences), len(all_tokens)))
   vec = dict.fromkeys(all_tokens, 0)
 
+  total_freq = dict.fromkeys(all_tokens, 0)
   # compute degree/freq for each sentence, add to data
   for i,sent in enumerate(sentences):
     cur_vec = copy.deepcopy(vec)
     for word in sent:
       degree = sum(C[word].values())
       freq = C[word][word]
+      # various methods to weight. freq and degree work pretty well. degree/freq...not so much
       cur_vec[word] = float(degree)/float(freq)
-    data[i,:] = np.array(cur_vec.values())
+      cur_vec[word] = float(freq)
+#      cur_vec[word] = float(degree)
 
+    arr = []
+    for key in sorted(cur_vec):
+      arr.append(cur_vec[key])
+      total_freq[key] += cur_vec[key]
+    data[i,:] = np.array(arr)
 
-  # TODO: Hey Joce, I'm hoping this all_tokens is an array and the data[i][j] would correspond to the jth token in all_tokens
-  # anyway we should figure this out tmr!
   return all_tokens, data
 
 # counts how many times each token is used as noun/verb/adj...
@@ -74,12 +87,12 @@ def pos_count(list_sentences, tokens):
   for sent in list_sentences:
     tokenized = word_tokenize(sent)
     pos_tok = nltk.pos_tag(tokenized)
-    for tok, pos in pos_tok
-      if 'NN' in pos
+    for tok, pos in pos_tok:
+      if 'NN' in pos:
         pos_tok[tok]['NN'] +=1
-      if 'JJ' in pos
+      if 'JJ' in pos:
         pos_tok[tok]['JJ'] += 1
-      if 'VRB' in pos
+      if 'VRB' in pos:
         pos_tok[tok]['VRB'] += 1
   return pos_dict
 
@@ -89,19 +102,3 @@ def pos_reweight(noun_weight, verb_weight, adj_weight, data, pos_dict):
     max_pos = max(pos_dict, key=pos_dict.get)
     # readjust weight based on max_pos, but need to agree on the form of data
     # .. a few lines of code to finish this function! should be easy
-
-def main():
-  nltk.data.path.append('/home/jocelyn/usb/nltk_data')
-  semeval_dir = 'data/maui-semeval2010-train/'
-  filenames = sorted(os.listdir(semeval_dir))
-  for filename in filenames:
-    if filename[-3:] == 'key':
-      continue
-    f = open(semeval_dir + filename, 'r')
-    content = f.read()
-    tokens, data = get_rakeweight_data(content)
-    # do something with data
-    break
-
-if __name__ == '__main__':
-  main()
