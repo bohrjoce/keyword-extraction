@@ -77,9 +77,6 @@ def get_rakeweight_data(doc):
       total_freq[key] += cur_vec[key]
     data[i,:] = np.array(arr)
 
-  for key in sorted(total_freq, key=total_freq.get, reverse=True):
-    print(key + ' ' + str(total_freq[key]))
-  print('--------')
   return all_tokens, data
 
 # counts how many times each token is used as noun/verb/adj...
