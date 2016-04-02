@@ -14,8 +14,10 @@ import copy
 
 def get_rakeweight_data(doc):
 
+  content = doc.lower()
+
   # replace non-ascii and newline characters with space
-  content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in doc])
+  content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in content])
 
   # return pretrained sentence tokenizer
   sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
@@ -57,6 +59,7 @@ def get_rakeweight_data(doc):
   data = np.zeros((len(sentences), len(all_tokens)))
   vec = dict.fromkeys(all_tokens, 0)
 
+  total_freq = dict.fromkeys(all_tokens, 0)
   # compute degree/freq for each sentence, add to data
   for i,sent in enumerate(sentences):
     cur_vec = copy.deepcopy(vec)
@@ -71,8 +74,12 @@ def get_rakeweight_data(doc):
     arr = []
     for key in sorted(cur_vec):
       arr.append(cur_vec[key])
+      total_freq[key] += cur_vec[key]
     data[i,:] = np.array(arr)
 
+  for key in sorted(total_freq, key=total_freq.get, reverse=True):
+    print(key + ' ' + str(total_freq[key]))
+  print('--------')
   return all_tokens, data
 
 # counts how many times each token is used as noun/verb/adj...
