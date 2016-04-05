@@ -9,7 +9,6 @@ from clustering import kcluster
 
 def main():
 
-  nltk.data.path.append('/home/jocelyn/usb/nltk_data')
   semeval_dir = 'data/maui-semeval2010-test/'
   filenames = sorted(os.listdir(semeval_dir))
   manual_keywords = []
@@ -32,9 +31,9 @@ def main():
         correct = 0
         f = open(semeval_dir + filename, 'r')
         content = f.read()
-        tokens, data = get_rakeweight_data(content)
+        tokens, data, mapping_back = get_rakeweight_data(content)
         # keywords = svd(...)
-        keywords = kcluster(5, data, tokens)
+        keywords = kcluster(mapping_back, 5, data, tokens)
         for keyword in keywords:
           if keyword in set(manual_keywords):
             correct += 1
