@@ -8,49 +8,55 @@
 			<p>Members: Jocelyn Bohr, Andrew Kanarek, Haoyu Liu, Nghia Vo</p>
 		</div>
 
+
+
+
+		{% if file_entered %}
 		<div class="row">
-			<form method="POST" action="#" enctype="multipart/form-data">
-			    <input type="file" accept="text/plain" name="file" id="file_input" />
-			    <input class="btn btn-primary" id="file_submit" type="submit" value="upload" />
+			<form method="GET" enctype="multipart/form-data">
+			    <input class="btn btn-primary" id="clear_file" type="submit" value="Clear" />
 			</form>
 		</div>
 
 		<div class="row">
-			<div class="col-md-8">
-				<p id="file-content"> {{ fileContent }} </p> 
-			</div>
-			<div class="col-md-4">
-				<h3 class="method-header">Keywords</h3>
-				{% for keyword in rake_tr_keywords %}
-					<p> {{ keyword }} </p>
-				{% endfor %}
-			</div>
-			
+			<p class="text" id="file-content"> {{ fileContent }} </p> 
 		</div>
 
-<!-- 		<div class="row" id="rake-tr">
-			<div class="col-md-12 method">
-				<h3 class="method-header">Keywords</h3>
-				{% for keyword in rake_tr_keywords %}
-					<p> {{ keyword }} </p>
+		<div class="row">
+			<div class="col-md-3">
+				<h3 class="method-header">RAKE</h3>
+				{% for keyword in rake_keywords %}
+					<p class="text"> {{ keyword }} </p>
 				{% endfor %}
 			</div>
-		</div> -->
+			<div class="col-md-3">
+				<h3 class="method-header">Clustering</h3>
+				{% for keyword in cluster_keywords %}
+					<p class="text"> {{ keyword }} </p>
+				{% endfor %}
+			</div>
+			<div class="col-md-3">
+				<h3 class="method-header">SVD</h3>
+				{% for keyword in svd_keywords %}
+					<p class="text"> {{ keyword }} </p>
+				{% endfor %}
+			</div>
+			<div class="col-md-3">
+				<h3 class="method-header">Rake + TextRank</h3>
+				{% for keyword in rake_tr_keywords %}
+					<p class="text"> {{ keyword }} </p>
+				{% endfor %}
+			</div>
+		</div>
+		{% else %}
+		<div class="row">
+			<form method="POST" enctype="multipart/form-data">
+			    <input type="file" accept="text/plain" name="file" id="file_input" />
+			    <input class="btn btn-primary" id="file_submit" type="submit" value="upload" />
+			</form>
+		</div>
+		{% endif %}
 
-
-		<!-- {% if fileEntered %} -->
-<!-- 
-			<div class="row">
-				<div class="col-md-6 method">
-					<h2 class="method-header">RAKE</h2>
-				</div>
-				<div class="col-md-6 method">
-					<h2 class="method-header">TextRank</h2>
-				</div>
-			</div> -->
-
-
-		<!-- {% endif %} -->
 
 
 

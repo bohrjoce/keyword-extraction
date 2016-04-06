@@ -13,20 +13,40 @@ def allowed_file(filename):
 @main.route('/', methods=['POST', 'GET'])
 def main_route():
 	rake_tr_keywords = []
+	svd_keywords = []
+	cluster_keywords = []
+	rake_keywords = []
 
 	f_content = ''
 	file_entered = False
 	if request.method == 'POST':
 		file = request.files['file']
+		# print file.filename
 		if file:
 			f_content = file.read()
 			file_entered = True
 			rake_tr_keywords = rake_tr.main(f_content)
+			svd_keywords = svd(f_content)
+			tokens, data, mapping_back = feature_extract.get_rakeweight_data(f_content)
+			print tokens
+			print data
+			print mapping_back
+			cluser_keywords = kcluster(mapping_back, 5, data, tokens)
+			print cluster_keywords
+			rake_keywords = getRake(f_content)
+			
 
+	if request.method == 'GET':
+		file_entered = False
+
+	print "file entered: " + str(file_entered)
 	options = {
-		"fileEntered": file_entered,
+		"file_entered": file_entered,
 		"fileContent": f_content,
-		"rake_tr_keywords": rake_tr_keywords
+		"rake_keywords": rake_keywords,
+		"svd_keywords": svd_keywords,
+		"rake_tr_keywords": rake_tr_keywords,
+		"cluster_keywords:": cluster_keywords
 	}
 
 	return render_template("index.html", **options)

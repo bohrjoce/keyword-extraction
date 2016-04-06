@@ -1,14 +1,16 @@
 .center {
 	margin:0 auto;
-	max-width: 500px;
+	width: 90%;
 }
 
 #title {
 	margin:0 auto;	
+	text-align: center;
 }
 
 #members {
 	margin:0 auto;	
+	text-align: center;
 }
 
 .method {
@@ -18,4 +20,12 @@
 }
 .method-header {
 
+}
+
+#file-content {
+	font-size: 30px;
+}
+
+.text {
+	font-size: 20px;
 }
