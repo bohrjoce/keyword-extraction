@@ -11,7 +11,7 @@ import operator
 
 damp = .85
 co_matrix = {} # dictionary of dictionaries representing co-occurence matrix
-conv = .01 # value to check if weights converge
+conv = .05 # value to check if weights converge
 
 def addToMatrix(word1, word2):
 	if word1 == word2:
@@ -25,6 +25,15 @@ def addToMatrix(word1, word2):
 	else: 
 		co_matrix[word1] = {}
 		co_matrix[word1][word2] = 1
+
+	# if word2 in co_matrix:
+	# 	if word1 in co_matrix[word2]:
+	# 		co_matrix[word2][word1] += 1
+	# 	else:
+	# 		co_matrix[word2][word1] = 1
+	# else: 
+	# 	co_matrix[word2] = {}
+	# 	co_matrix[word2][word1] = 1
 
 
 def get_rakeweight_data(doc):
@@ -102,7 +111,9 @@ def updateNode(vertex_scores, temp_scores, token):
 
 	for edge in co_matrix[token]:
 		edge_weight = co_matrix[token][edge]
-		adj_weight = vertex_scores[edge]
+		adj_weight = 0
+		if edge in vertex_scores:
+			adj_weight = vertex_scores[edge]
 		count = 0
 		for e in co_matrix[edge]:
 			count += co_matrix[edge][e]
@@ -133,21 +144,38 @@ def main(text):
 	tokens = get_rakeweight_data(text)
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
-	printScores(vertex_scores)
-	print
+	# printScores(vertex_scores)
+
+	# dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
+	# num_words = len(vertex_scores)
+	# rake_keywords = []
+	# # according to TextRank, # of keywords should be size of set divided by 3
+	# count = 1
+	# for i in dic: 
+	# 	if (count > (num_words / 3) + 1):
+	# 		break
+	# 	rake_keywords.append(i[0])
+	# 	count += 1
+
+	# print rake_keywords
+	# print
+
+
 	# iterates through TextRank algorithm until it converges
 	has_converged = False
 	counter = 0
 	while not has_converged:
 		has_converged = True
-		# print "ROUND " + str(counter)
-		printScores(vertex_scores)
+		print "ROUND " + str(counter)
+		# printScores(vertex_scores)
 		print
 		temp_scores = dict(vertex_scores)
 		for t in tokens:
-			c = updateNode(vertex_scores, temp_scores, t)
-			if not c:
-				has_converged = False
+			# print "token: " + str(t)
+			if t is not None:
+				c = updateNode(vertex_scores, temp_scores, t)
+				if not c:
+					has_converged = False
 		# print "converged? " + str(has_converged)
 		vertex_scores = dict(temp_scores)
 
@@ -155,7 +183,7 @@ def main(text):
 			break
 		counter += 1
 
-	printScores(vertex_scores)
+	# printScores(vertex_scores)
 
 	dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
 	num_words = len(vertex_scores)
@@ -172,8 +200,33 @@ def main(text):
 	return keywords
 
 if __name__ == '__main__':
-	text = "The presidential race is coming up. Who do you think will win? It will be a close presidential race."
-	text = "Information Retrieval is very fun. I learn a lot from the class. There is much to learn from information retrieval."
+	text = "The presidential race is coming soon. Who do you think will win? It will be a close presidential race."
+	text = "The presidential race is coming soon. It will be a close presidential race."
+	text = '''Efficient discovery of grid services is essential for the success of
+grid computing. The standardization of grids based on web
+services has resulted in the need for scalable web service
+discovery mechanisms to be deployed in grids Even though UDDI
+has been the de facto industry standard for web-services
+discovery, imposed requirements of tight-replication among
+registries and lack of autonomous control has severely hindered
+its widespread deployment and usage. With the advent of grid
+computing the scalability issue of UDDI will become a roadblock
+that will prevent its deployment in grids. In this paper we present
+our distributed web-service discovery architecture, called DUDE
+(Distributed UDDI Deployment Engine). DUDE leverages DHT
+(Distributed Hash Tables) as a rendezvous mechanism between
+multiple UDDI registries. DUDE enables consumers to query
+multiple registries, still at the same time allowing organizations to
+have autonomous control over their registries.. Based on
+preliminary prototype on PlanetLab, we believe that DUDE
+architecture can support effective distribution of UDDI registries
+thereby making UDDI more robust and also addressing its scaling
+issues. Furthermore, The DUDE architecture for scalable
+distribution can be applied beyond UDDI to any Grid Service
+Discovery mechanism.'''
+
+	text = "Harold ate an apple. Harold did not realize it was a magic apple. If he had known it was magic, he would have ate the whole apple."
+	# text = "Information Retrieval is very fun. I learn a lot from the class. There is much to learn from information retrieval."
 	main(text)
 
 
