@@ -6,7 +6,7 @@ import nltk
 import os
 from feature_extract import get_rakeweight_data
 
-def kcluster(num_cluster, weight_array, one_hot_tokens, num_key = 10):
+def kcluster(mapping_back, num_cluster, weight_array, one_hot_tokens, num_key = 10):
   # num_key is the number of keyword that we extract from a cluster
   # we can find the union of the extracted keys from each cluster
 
@@ -20,7 +20,7 @@ def kcluster(num_cluster, weight_array, one_hot_tokens, num_key = 10):
     union_array = list(set(tmp) | set(union_array))
   res = []
   for ind in union_array:
-    res.append(one_hot_tokens[ind])
+    res.append(mapping_back[one_hot_tokens[ind]])
   return res
 
 def main():

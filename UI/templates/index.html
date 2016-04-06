@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+	<div class="container-fluid">
+		<div class="row" id="title">
+			<h1>Keyword Extraction</h1>
+		</div>
+		<div class="row" id="members">
+			<p>Members: Jocelyn Bohr, Andrew Kanarek, Haoyu Liu, Nghia Vo</p>
+		</div>
+
+		<div class="row">
+			<form method="POST" action="#" enctype="multipart/form-data">
+			    <input type="file" accept="text/plain" name="file" id="file_input" />
+			    <input class="btn btn-primary" id="file_submit" type="submit" value="upload" />
+			</form>
+		</div>
+
+		<div class="row">
+			<div class="col-md-8">
+				<p id="file-content"> {{ fileContent }} </p> 
+			</div>
+			<div class="col-md-4">
+				<h3 class="method-header">Keywords</h3>
+				{% for keyword in rake_tr_keywords %}
+					<p> {{ keyword }} </p>
+				{% endfor %}
+			</div>
+			
+		</div>
+
+<!-- 		<div class="row" id="rake-tr">
+			<div class="col-md-12 method">
+				<h3 class="method-header">Keywords</h3>
+				{% for keyword in rake_tr_keywords %}
+					<p> {{ keyword }} </p>
+				{% endfor %}
+			</div>
+		</div> -->
+
+
+		<!-- {% if fileEntered %} -->
+<!-- 
+			<div class="row">
+				<div class="col-md-6 method">
+					<h2 class="method-header">RAKE</h2>
+				</div>
+				<div class="col-md-6 method">
+					<h2 class="method-header">TextRank</h2>
+				</div>
+			</div> -->
+
+
+		<!-- {% endif %} -->
+
+
+
+	</div>
+
+
+	
+{% endblock %}

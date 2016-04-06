@@ -33,7 +33,7 @@ def get_rakeweight_data(doc):
   # also need to keep a mapping back from stemmed-tagged version to un-stemmed but lemmatized
   mapping_back = {}
   # maybe use a flag here instead of True
-  if True:
+  if False:
     sentences = lemmatize_sen(sentences)
     sentences, mapping_back = stem_sen(sentences)
   else:
@@ -49,8 +49,8 @@ def get_rakeweight_data(doc):
 
   # TODO: maybe put a flag in featrue extract for all of these options
   # remove stopwords
-  sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()
-      not in stopwords.words('english')) )) for sent in sentences]
+  # sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()
+    #  not in stopwords.words('english')) )) for sent in sentences]
 
   # stem tokens
   # dont stem for now
