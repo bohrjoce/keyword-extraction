@@ -6,6 +6,7 @@ import nltk
 import os
 from feature_extract import get_rakeweight_data
 from clustering import kcluster
+from rake_tr import *
 
 def main():
 
@@ -34,7 +35,8 @@ def main():
         content = f.read()
         tokens, data = get_rakeweight_data(content)
         # keywords = svd(...)
-        keywords = kcluster(5, data, tokens)
+        # keywords = kcluster(5, data, tokens)
+        keywords = rake_tr.main()
         for keyword in keywords:
           if keyword in set(manual_keywords):
             correct += 1

@@ -1,0 +1,21 @@
+.center {
+	margin:0 auto;
+	max-width: 500px;
+}
+
+#title {
+	margin:0 auto;	
+}
+
+#members {
+	margin:0 auto;	
+}
+
+.method {
+	height: 300px;
+	width: 100px;
+	border: 1px solid black;
+}
+.method-header {
+
+}

@@ -133,7 +133,7 @@ def main(text):
 	tokens = get_rakeweight_data(text)
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
-	printScores(vertex_scores)
+	# printScores(vertex_scores)
 	print
 	# iterates through TextRank algorithm until it converges
 	has_converged = False
@@ -141,7 +141,7 @@ def main(text):
 	while not has_converged:
 		has_converged = True
 		# print "ROUND " + str(counter)
-		printScores(vertex_scores)
+		# printScores(vertex_scores)
 		print
 		temp_scores = dict(vertex_scores)
 		for t in tokens:
@@ -163,7 +163,7 @@ def main(text):
 	# according to TextRank, # of keywords should be size of set divided by 3
 	count = 1
 	for i in dic: 
-		if (count > (num_words / 3) + 1):
+		if (count > (num_words / 3) and count > 3):
 			break
 		keywords.append(i[0])
 		count += 1
