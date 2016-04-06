@@ -4,17 +4,11 @@ from sklearn import cluster
 import numpy as np
 import nltk
 import os
-<<<<<<< HEAD
-from feature_extract import get_rakeweight_data
 from nltk.corpus import stopwords
 from clustering import kcluster
-#from rake_tr import *
 from svd import svd
-=======
 import feature_extract
-from clustering import kcluster
 import rake_tr
->>>>>>> cd867cc874d0683c2941c5514735cca7d127ed22
 
 nltk.data.path.append('/home/jocelyn/usb/nltk_data')
 def main():
@@ -44,10 +38,9 @@ def main():
         correct = 0
         f = open(semeval_dir + filename, 'r')
         content = f.read()
-        tokens, data, mapping_back = get_rakeweight_data(content)
 #        keywords = svd(content)
 #        keywords = rake_tr.main()
-        keywords = kcluster(mapping_back, 6, data, tokens)
+        keywords = kcluster(content)
         keywords = list(set(keywords))
         keywords = [word.encode('ascii') for word in keywords]
 #        print('--------manual keywords---------')
