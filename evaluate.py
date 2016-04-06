@@ -35,7 +35,7 @@ def main():
         tokens, data, mapping_back = get_rakeweight_data(content)
         # keywords = svd(...)
         keywords = rake_tr.main()
-        keywords = kcluster(mapping_back, 5, data, tokens)
+        # keywords = kcluster(mapping_back, 5, data, tokens)
         for keyword in keywords:
           if keyword in set(manual_keywords):
             correct += 1
