@@ -4,9 +4,9 @@ from sklearn import cluster
 import numpy as np
 import nltk
 import os
-from feature_extract import get_rakeweight_data
+import feature_extract 
 from clustering import kcluster
-from rake_tr import *
+import rake_tr
 
 def main():
 
@@ -32,9 +32,10 @@ def main():
         correct = 0
         f = open(semeval_dir + filename, 'r')
         content = f.read()
-        tokens, data, mapping_back = get_rakeweight_data(content)
+        tokens, data, mapping_back = feature_extract.get_rakeweight_data(content)
         # keywords = svd(...)
-        keywords = rake_tr.main()
+        print "FILENAME: " + filename
+        keywords = rake_tr.main(content)
         # keywords = kcluster(mapping_back, 5, data, tokens)
         for keyword in keywords:
           if keyword in set(manual_keywords):
