@@ -34,7 +34,11 @@ def get_rakeweight_data(doc):
   mapping_back = {}
   # maybe use a flag here instead of True
   all_tokens = []
+<<<<<<< HEAD
   if False:
+=======
+  if True:
+>>>>>>> d5b495811036156d701b5a5d05d59359e8250234
     sentences, all_tokens, mapping_back = stem_sen(sentences)
     all_tokens = sorted(list(set(all_tokens)))
   else:
@@ -150,4 +154,8 @@ def stem_sen(list_sentences):
       most_freq = max(mapping_back[tok][pos], key = mapping_back[tok][pos].get)
       res_map[tmp_tok] = most_freq
       res_list.append(tmp_tok)
+<<<<<<< HEAD
   return res_sen, res_list, res_map
+=======
+  return res_sen, res_list, res_map
+>>>>>>> d5b495811036156d701b5a5d05d59359e8250234
