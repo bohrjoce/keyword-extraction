@@ -1,6 +1,6 @@
 
 import nltk.data
-tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+#tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 from nltk.stem import WordNetLemmatizer
 from collections import Counter
 from nltk.tokenize import RegexpTokenizer
@@ -9,29 +9,30 @@ import re
 from nltk.stem.porter import *
 import math
 import numpy as np
+from feature_extract import get_rakeweight_data
 #read document
 
 #interfaces:
 #svd function, out put the principal component
-def svd_mat(mat, vocalst):
+def svd_mat(mat, vocalst, map_back):
 
+	mat = np.transpose(mat)
 	U,s,V = np.linalg.svd(mat, full_matrices=True)
 	idx = 0;
 	for i in range(1, len(s)):
-		if (s[i] < s[0]*0.5): 
+		if (s[i] < s[0]*0.5):
 			idx = i
 			break;
 	S = np.diag(s[0:idx])
 	up = U[:, 0:idx]
-	vp = V[0:idx, :] 
+	vp = V[0:idx, :]
 	recover = np.dot(up, np.dot(S, vp))
 	flst = np.sum(recover,axis=1)
 	sortidx = list(np.argsort(flst))
 	sortidx.reverse()
 	rlst = []
 	for i in range(0,7):
-		rlst.append(vocalst[sortidx[i]])
-	print(rlst)
+		rlst.append(map_back[vocalst[sortidx[i]]])
 	return rlst
 	'''
 	u1 = U[:, 0]
@@ -61,10 +62,12 @@ def process_file(filename):
 	#f = open(filename)
 	#s = f.read()
 	s = filename
+	return get_rakeweight_data(s)
+	asdasd = '''s = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in s])
 	s1 = s.replace('\n', ' ')
 	s1 = re.sub("\<.+\>", "", s1)
-	lst = tokenizer.tokenize(s1)
-	return lst
+	tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+	lst = tokenizer.tokenize(s1)'''
 
 
 def make_mat(lst):
@@ -79,6 +82,10 @@ def make_mat(lst):
 		for word in sublst:	#normalize and remove stopwords
 
 			w1 = str(word)
+			if len(w1) == 1:
+				continue
+			if w1.isdigit():
+				continue
 			if (w1 in stopwords.words('english')):continue
 			if (w1 not in suboutlst): vocabulary[w1] = vocabulary.get(w1, 0) + 1
 			suboutlst.append(w1)
@@ -100,9 +107,9 @@ def make_mat(lst):
 	return mat, vocalst
 
 def svd(filename):
-	lst = process_file(filename)
-	mat, vocalst = make_mat(lst)
-	rlst = svd_mat(mat, vocalst)
+	tokens, data, map_back = process_file(filename)
+#	mat, vocalst = make_mat(lst)
+	rlst = svd_mat(data, tokens, map_back)
 	return rlst
 
 
