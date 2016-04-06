@@ -16,6 +16,24 @@ import numpy as np
 def svd_mat(mat, vocalst):
 
 	U,s,V = np.linalg.svd(mat, full_matrices=True)
+	idx = 0;
+	for i in range(1, len(s)):
+		if (s[i] < s[0]*0.5): 
+			idx = i
+			break;
+	S = np.diag(s[0:idx])
+	up = U[:, 0:idx]
+	vp = V[0:idx, :] 
+	recover = np.dot(up, np.dot(S, vp))
+	flst = np.sum(recover,axis=1)
+	sortidx = list(np.argsort(flst))
+	sortidx.reverse()
+	rlst = []
+	for i in range(0,7):
+		rlst.append(vocalst[sortidx[i]])
+	print(rlst)
+	return rlst
+	'''
 	u1 = U[:, 0]
 	u1x = np.absolute(u1)
 	sortidx = list(np.argsort(u1x))
@@ -33,11 +51,16 @@ def svd_mat(mat, vocalst):
 	for i in range(0, 10):
 		print vocalst[sortidx2[i]]
 
+	for i in range(0, 20):
+		print s[i]
+	'''
+
 #process the file get a list of sentences
 def process_file(filename):
 
-	f = open(filename)
-	s = f.read()
+	#f = open(filename)
+	#s = f.read()
+	s = filename
 	s1 = s.replace('\n', ' ')
 	s1 = re.sub("\<.+\>", "", s1)
 	lst = tokenizer.tokenize(s1)
@@ -76,7 +99,10 @@ def make_mat(lst):
 		mat = np.concatenate((mat, v), axis = 1)
 	return mat, vocalst
 
+def svd(filename):
+	lst = process_file(filename)
+	mat, vocalst = make_mat(lst)
+	rlst = svd_mat(mat, vocalst)
+	return rlst
 
-lst = process_file('C-1.txt')
-mat, vocalst = make_mat(lst)
-svd_mat(mat, vocalst)
+
