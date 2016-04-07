@@ -4,6 +4,7 @@ from nltk.tokenize.api import StringTokenizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.tokenize.punkt import PunktSentenceTokenizer
+from feature_extract import stem_sen, remove_non_nva_sen
 import nltk.data
 import numpy as np
 import copy
@@ -11,6 +12,7 @@ import operator
 
 damp = .85
 co_matrix = {} # dictionary of dictionaries representing co-occurence matrix
+co_matrix_count = {}
 conv = .05 # value to check if weights converge
 
 def addToMatrix(word1, word2):
@@ -20,49 +22,42 @@ def addToMatrix(word1, word2):
 	if word1 in co_matrix:
 		if word2 in co_matrix[word1]:
 			co_matrix[word1][word2] += 1
+			co_matrix_count[word1] += 1
 		else:
 			co_matrix[word1][word2] = 1
+			co_matrix_count[word1] =+ 1
 	else: 
 		co_matrix[word1] = {}
 		co_matrix[word1][word2] = 1
-
-	# if word2 in co_matrix:
-	# 	if word1 in co_matrix[word2]:
-	# 		co_matrix[word2][word1] += 1
-	# 	else:
-	# 		co_matrix[word2][word1] = 1
-	# else: 
-	# 	co_matrix[word2] = {}
-	# 	co_matrix[word2][word1] = 1
+		co_matrix_count[word1] = 1
 
 
 def get_rakeweight_data(doc):
 
   # replace non-ascii and newline characters with space
-  content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in doc])
+  content = doc.lower()
+  content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in content])
 
+  global co_matrix
+  global co_matrix_count
+  co_matrix = {}
+  co_matrix_count = {}
   # return pretrained sentence tokenizer
   sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
 
   # segment content into sentences
   sentences = sent_detector.tokenize(content)
 
-  # tokenize words in sentences
-  sentences = [word_tokenize(sent) for sent in sentences]
+  sentences = remove_non_nva_sen(sentences)
 
-  # remove stopwords
-  sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()
-      not in stopwords.words('english')) )) for sent in sentences]
-
-  # stem tokens
-  # stemmer = EnglishStemmer()
-  # sentences = [list(stemmer.stem(t) for t in sent) for sent in sentences]
-
-  # get list of all tokens
-  all_tokens = [t for sent in sentences for t in sent]
-
-  # remove duplicates and sort
+  # do the transformation as follow:
+  # replace each token in each sentence by their lemmatized->stemmed->tagged version. 
+  # also need to keep a mapping back from stemmed-tagged version to un-stemmed but lemmatized
+  mapping_back = {}
+  sentences, all_tokens, mapping_back = stem_sen(sentences)
   all_tokens = sorted(list(set(all_tokens)))
+  # remove stopwords
+  sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()not in stopwords.words('english')) )) for sent in sentences]
 
   # ---- replace rakeweight with differenct weighting scheme ----
 
@@ -73,19 +68,7 @@ def get_rakeweight_data(doc):
   			if word1 != word2:
   				addToMatrix(word1, word2)
 
-  return all_tokens
-
-
-
-# takes indexes of tokens and stores them in vertices dict
-# appends 
-# def addEdge(token1, token2):
-# 	if token1 not in vertices:
-# 		vertices[token1] = []
-
-# 	if token2 not in vertices[token1]:
-# 		vertices[token1].append(token2)
-
+  return all_tokens, mapping_back
 
 # given a co-occurence matrix and list of tokens,
 # intitializes vertex weights given RAKE algorithm
@@ -98,7 +81,7 @@ def getTokenWeight(vertex_scores, tokens):
 				# addEdge(t1, t2)
 				degree += co_matrix[t1][t2]
 				freq += 1
-			vertex_scores[t1] = float(degree) / freq
+			vertex_scores[t1] = float(degree) / float(freq)
 	
 
 # uodates a vertice based on the TextRank algorithm with weighted edges and vertices
@@ -114,11 +97,8 @@ def updateNode(vertex_scores, temp_scores, token):
 		adj_weight = 0
 		if edge in vertex_scores:
 			adj_weight = vertex_scores[edge]
-		count = 0
-		for e in co_matrix[edge]:
-			count += co_matrix[edge][e]
-		total += (adj_weight * edge_weight) / count
-		# total += count * adj_weight / (edge_weight)
+		count = co_matrix_count[edge]
+		total += (adj_weight * edge_weight) / float(count)
 
 	total *= damp
 	total += 1 - damp
@@ -141,34 +121,18 @@ def printScores(vertex_scores):
 def main(text):
 	text = text.lower()
 	
-	tokens = get_rakeweight_data(text)
+	tokens, mapping_back = get_rakeweight_data(text)
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
 	# printScores(vertex_scores)
-
-	# dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
-	# num_words = len(vertex_scores)
-	# rake_keywords = []
-	# # according to TextRank, # of keywords should be size of set divided by 3
-	# count = 1
-	# for i in dic: 
-	# 	if (count > (num_words / 3) + 1):
-	# 		break
-	# 	rake_keywords.append(i[0])
-	# 	count += 1
-
-	# print rake_keywords
-	# print
-
 
 	# iterates through TextRank algorithm until it converges
 	has_converged = False
 	counter = 0
 	while not has_converged:
 		has_converged = True
-		print "ROUND " + str(counter)
+		#print "ROUND " + str(counter)
 		# printScores(vertex_scores)
-		print
 		temp_scores = dict(vertex_scores)
 		for t in tokens:
 			# print "token: " + str(t)
@@ -179,22 +143,28 @@ def main(text):
 		# print "converged? " + str(has_converged)
 		vertex_scores = dict(temp_scores)
 
-		if counter == 30:
+		if counter == 100:
 			break
 		counter += 1
 
 	# printScores(vertex_scores)
 
-	dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
-	num_words = len(vertex_scores)
-	keywords = []
+#	dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
+#	num_words = len(vertex_scores)
+#	keywords = []
 	# according to TextRank, # of keywords should be size of set divided by 3
-	count = 1
-	for i in dic: 
-		if (count > (num_words / 3) + 1):
-			break
-		keywords.append(i[0])
-		count += 1
+#	count = 1
+#	for i in dic: 
+#		if (count > 30):
+#			break
+#		keywords.append(mapping_back[i[0]])
+#		count += 1
+	num_words = len(vertex_scores)
+
+	keywords = []
+	tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:27]
+	for tok, val in tok_max:
+		keywords.append(mapping_back[tok])
 
 	print keywords	
 	return keywords
