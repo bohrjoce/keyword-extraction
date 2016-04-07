@@ -167,21 +167,6 @@ def main(text):
 	getTokenWeight(vertex_scores, tokens)
 	# printScores(vertex_scores)
 
-	# dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
-	# num_words = len(vertex_scores)
-	# rake_keywords = []
-	# # according to TextRank, # of keywords should be size of set divided by 3
-	# count = 1
-	# for i in dic: 
-	# 	if (count > (num_words / 3) + 1):
-	# 		break
-	# 	rake_keywords.append(i[0])
-	# 	count += 1
-
-	# print rake_keywords
-	# print
-
-
 	# iterates through TextRank algorithm until it converges
 	has_converged = False
 	counter = 0

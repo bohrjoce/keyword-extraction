@@ -27,11 +27,12 @@ def main_route():
 			file_entered = True
 			rake_tr_keywords = rake_tr.main(f_content)
 			svd_keywords = svd(f_content)
-			tokens, data, mapping_back = feature_extract.get_rakeweight_data(f_content)
-			print tokens
-			print data
-			print mapping_back
-			cluser_keywords = kcluster(mapping_back, 5, data, tokens)
+			# tokens, data, mapping_back = feature_extract.get_rakeweight_data(f_content)
+			# print tokens
+			# print data
+			# print mapping_back
+			# cluser_keywords = kcluster(mapping_back, 5, data, tokens)
+			cluster_keywords = getCluster(f_content)
 			print cluster_keywords
 			rake_keywords = getRake(f_content)
 			
@@ -46,7 +47,7 @@ def main_route():
 		"rake_keywords": rake_keywords,
 		"svd_keywords": svd_keywords,
 		"rake_tr_keywords": rake_tr_keywords,
-		"cluster_keywords:": cluster_keywords
+		"cluster_keywords": cluster_keywords
 	}
 
 	return render_template("index.html", **options)
