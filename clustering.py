@@ -39,5 +39,12 @@ def main():
       print(v)
     break
 
+def getCluster(text):
+  tokens, data, mapping_back = get_rakeweight_data(text)
+  keywords = kcluster(mapping_back, 5, data, tokens)
+  keywords = list(set(keywords))
+  keywords = [word.encode('ascii') for word in keywords]
+  return keywords
+
 if __name__ == '__main__':
   main()

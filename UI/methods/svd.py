@@ -29,7 +29,7 @@ def svd_mat(mat, vocalst):
 	sortidx = list(np.argsort(flst))
 	sortidx.reverse()
 	rlst = []
-	for i in range(0,7):
+	for i in range(0,4):
 		rlst.append(vocalst[sortidx[i]])
 	# print(rlst)
 	return rlst
