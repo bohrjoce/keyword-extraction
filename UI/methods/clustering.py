@@ -4,7 +4,7 @@ from sklearn import cluster
 import numpy as np
 import nltk
 import os
-import feature_extract
+from feature_extract import get_rakeweight_data
 
 def kcluster(mapping_back, num_cluster, weight_array, one_hot_tokens, num_key = 10):
   # num_key is the number of keyword that we extract from a cluster
@@ -33,11 +33,15 @@ def main():
     f = open(semeval_dir + filename, 'r')
     print(filename)
     content = f.read()
-    tokens, data, mapping_back = feature_extract.get_rakeweight_data(content)
-    vec = kcluster(mapping_back, 5, data, tokens)
+    tokens, data = get_rakeweight_data(content)
+    vec = kcluster(5, data, tokens)
     for v in vec:
       print(v)
     break
+
+def getCluster(text):
+  tokens, data, mapping_back = get_rakeweight_data(text)
+  return kcluster(mapping_back, 5, data, tokens)
 
 if __name__ == '__main__':
   main()
