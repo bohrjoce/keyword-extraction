@@ -6,9 +6,11 @@ import nltk
 import os
 from feature_extract import get_rakeweight_data
 
-def kcluster(mapping_back, num_cluster, weight_array, one_hot_tokens, num_key = 10):
+def kcluster(content, num_cluster = 6, num_key = 12):
   # num_key is the number of keyword that we extract from a cluster
   # we can find the union of the extracted keys from each cluster
+
+  one_hot_tokens, weight_array, mapping_back = get_rakeweight_data(content)
 
   # in case we have less vector than cluste number
   num_cluster = min(num_cluster, len(weight_array))
