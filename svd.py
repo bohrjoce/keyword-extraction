@@ -10,6 +10,7 @@ from nltk.stem.porter import *
 import math
 import numpy as np
 from feature_extract import get_rakeweight_data
+from postprocess import postprocess
 #read document
 
 #interfaces:
@@ -31,7 +32,7 @@ def svd_mat(mat, vocalst, map_back):
 	sortidx = list(np.argsort(flst))
 	sortidx.reverse()
 	rlst = []
-	for i in range(0,7):
+	for i in range(0,25):
 		rlst.append(map_back[vocalst[sortidx[i]]])
 	return rlst
 	'''
@@ -107,9 +108,11 @@ def make_mat(lst):
 	return mat, vocalst
 
 def svd(filename):
-	tokens, data, map_back = process_file(filename)
+	tokens, data, map_back, stemmed_sentences = process_file(filename)
 #	mat, vocalst = make_mat(lst)
 	rlst = svd_mat(data, tokens, map_back)
-	return rlst
+  # combine into multiple keywords
+	keywords = postprocess(rlst, stemmed_sentences)
+	return keywords
 
 

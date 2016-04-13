@@ -11,13 +11,31 @@ from nltk.tokenize import word_tokenize
 from collections import defaultdict
 import nltk.data
 import copy
+import re
 
 def get_rakeweight_data(doc):
 
-  content = doc.lower()
-
   # replace non-ascii and newline characters with space
-  content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in content])
+  doc = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in doc])
+
+
+  # remove everything above abstract and below references
+  abstractRE = re.compile(r'(.*ABSTRACT)(.*)')
+  abstractREv2 = re.compile(r'(.*Abstract)(.*)')
+  abstract = abstractRE.match(doc)
+  if abstract is None:
+    abstract = abstractREv2.match(doc)
+  doc = abstract.group(2)
+
+  referencesRE = re.compile(r'(.*)(REFERENCES.*)')
+  referencesREv2 = re.compile(r'(.*)(References.*)')
+  references = referencesRE.match(doc)
+  if references is None:
+    references = referencesREv2.match(doc)
+  if references is not None:
+    doc = references.group(1)
+
+  content = doc.lower()
 
   # return pretrained sentence tokenizer
   sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
@@ -25,11 +43,21 @@ def get_rakeweight_data(doc):
   # segment content into sentences
   sentences = sent_detector.tokenize(content)
 
+
+  # split sentences, then split sentences into tokens
+  # THIS IS FOR COMBINING SINGLE KEYWORDS LATER
+  stemmed_sentences = [word_tokenize(sent) for sent in sentences]
+  stemmer = EnglishStemmer()
+  stemmed_sentences = [list(stemmer.stem(word).encode('ascii') for word in sent) for sent in stemmed_sentences]
+#  stemmed_tokenized_content = [word for word in stemmed_tokenized_content if re.match('^[\w-]+$', word) is not None]
+  stemmed_sentences = [list(word for word in sent if word.isalpha()) for sent in stemmed_sentences]
+
+
   # remove tokens in each sentence that aren't Noun, Verb or Adj
   sentences = remove_non_nva_sen(sentences)
 
   # do the transformation as follow:
-  # replace each token in each sentence by their lemmatized->stemmed->tagged version. 
+  # replace each token in each sentence by their lemmatized->stemmed->tagged version.
   # also need to keep a mapping back from stemmed-tagged version to un-stemmed but lemmatized
   mapping_back = {}
   # maybe use a flag here instead of True
@@ -50,7 +78,6 @@ def get_rakeweight_data(doc):
 
   # remove stopwords
   sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()not in stopwords.words('english')) )) for sent in sentences]
-
 
   # ---- replace rakeweight with differenct weighting scheme ----
 
@@ -86,7 +113,7 @@ def get_rakeweight_data(doc):
       total_freq[key] += cur_vec[key]
     data[i,:] = np.array(arr)
 
-  return all_tokens, data, mapping_back
+  return all_tokens, data, mapping_back, stemmed_sentences
 
 # look at each sentences and remove word that aren't Noun, verb, or adj
 def remove_non_nva_sen(list_sentences):
@@ -104,7 +131,7 @@ def remove_non_nva_sen(list_sentences):
 
 def stem_sen(list_sentences):
   stemmer = EnglishStemmer()
-  # map back should be a dict with words, 
+  # map back should be a dict with words,
   # each word map to 3 version: noun, adj, verb,
   # and each version is a list of pair
   lem = WordNetLemmatizer()
@@ -132,7 +159,7 @@ def stem_sen(list_sentences):
         mapping_back[stem_tok] = {}
       if pos not in mapping_back[stem_tok]:
         mapping_back[stem_tok][pos] = {}
-      
+
       # increase count
       if tok not in mapping_back[stem_tok][pos]:
         mapping_back[stem_tok][pos][tok] = 1
@@ -146,7 +173,7 @@ def stem_sen(list_sentences):
   for tok in mapping_back:
     for pos in mapping_back[tok]:
       tmp_tok = tok + '-' + pos
-      # find the most frequently, unstemmed word correspond to the stemmer + tagged 
+      # find the most frequently, unstemmed word correspond to the stemmer + tagged
       most_freq = max(mapping_back[tok][pos], key = mapping_back[tok][pos].get)
       res_map[tmp_tok] = most_freq
       res_list.append(tmp_tok)

@@ -26,7 +26,7 @@ def addToMatrix(word1, word2):
 		else:
 			co_matrix[word1][word2] = 1
 			co_matrix_count[word1] =+ 1
-	else: 
+	else:
 		co_matrix[word1] = {}
 		co_matrix[word1][word2] = 1
 		co_matrix_count[word1] = 1
@@ -48,10 +48,18 @@ def get_rakeweight_data(doc):
   # segment content into sentences
   sentences = sent_detector.tokenize(content)
 
+  # split sentences, then split sentences into tokens
+  # THIS IS FOR COMBINING SINGLE KEYWORDS LATER
+  stemmed_sentences = [word_tokenize(sent) for sent in sentences]
+  stemmer = EnglishStemmer()
+  stemmed_sentences = [list(stemmer.stem(word).encode('ascii') for word in sent) for sent in stemmed_sentences]
+#  stemmed_tokenized_content = [word for word in stemmed_tokenized_content if re.match('^[\w-]+$', word) is not None]
+  stemmed_sentences = [list(word for word in sent if word.isalpha()) for sent in stemmed_sentences]
+
   sentences = remove_non_nva_sen(sentences)
 
   # do the transformation as follow:
-  # replace each token in each sentence by their lemmatized->stemmed->tagged version. 
+  # replace each token in each sentence by their lemmatized->stemmed->tagged version.
   # also need to keep a mapping back from stemmed-tagged version to un-stemmed but lemmatized
   mapping_back = {}
   sentences, all_tokens, mapping_back = stem_sen(sentences)
@@ -68,7 +76,7 @@ def get_rakeweight_data(doc):
   			if word1 != word2:
   				addToMatrix(word1, word2)
 
-  return all_tokens, mapping_back
+  return all_tokens, mapping_back, stemmed_sentences
 
 # given a co-occurence matrix and list of tokens,
 # intitializes vertex weights given RAKE algorithm
@@ -82,10 +90,10 @@ def getTokenWeight(vertex_scores, tokens):
 				degree += co_matrix[t1][t2]
 				freq += 1
 			vertex_scores[t1] = float(degree) / float(freq)
-	
+
 
 # uodates a vertice based on the TextRank algorithm with weighted edges and vertices
-# W(Vi) = (1-d) + d * sum(weight of edge from i to j for all adjacent j/ sum(weight of edges from j to k for all adjacent k)) * W(j) 
+# W(Vi) = (1-d) + d * sum(weight of edge from i to j for all adjacent j/ sum(weight of edges from j to k for all adjacent k)) * W(j)
 # returns true if token node is converging, false otherwise
 def updateNode(vertex_scores, temp_scores, token):
 	total = 0
@@ -120,8 +128,8 @@ def printScores(vertex_scores):
 
 def main(text):
 	text = text.lower()
-	
-	tokens, mapping_back = get_rakeweight_data(text)
+
+	tokens, mapping_back, stemmed_sentences = get_rakeweight_data(text)
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
 	# printScores(vertex_scores)
@@ -154,7 +162,7 @@ def main(text):
 #	keywords = []
 	# according to TextRank, # of keywords should be size of set divided by 3
 #	count = 1
-#	for i in dic: 
+#	for i in dic:
 #		if (count > 30):
 #			break
 #		keywords.append(mapping_back[i[0]])
@@ -166,7 +174,9 @@ def main(text):
 	for tok, val in tok_max:
 		keywords.append(mapping_back[tok])
 
-	print keywords	
+  # construct multiple keywords
+	keywords = postprocess(keywords, stemmed_keywords)
+#	print keywords
 	return keywords
 
 if __name__ == '__main__':
