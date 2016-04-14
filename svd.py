@@ -15,15 +15,11 @@ from postprocess import postprocess
 
 #interfaces:
 #svd function, out put the principal component
-def svd_mat(mat, vocalst, map_back):
+def svd_mat(mat, vocalst, map_back, num_of_comp = 3):
 
 	mat = np.transpose(mat)
 	U,s,V = np.linalg.svd(mat, full_matrices=True)
-	idx = 0;
-	for i in range(1, len(s)):
-		if (s[i] < s[0]*0.5):
-			idx = i
-			break;
+	idx = num_of_comp;
 	S = np.diag(s[0:idx])
 	up = U[:, 0:idx]
 	vp = V[0:idx, :]
@@ -58,17 +54,12 @@ def svd_mat(mat, vocalst, map_back):
 	'''
 
 #process the file get a list of sentences
-def process_file(filename):
+def process_file(docstr):
 
 	#f = open(filename)
 	#s = f.read()
-	s = filename
+	s = docstr 
 	return get_rakeweight_data(s)
-	asdasd = '''s = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in s])
-	s1 = s.replace('\n', ' ')
-	s1 = re.sub("\<.+\>", "", s1)
-	tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-	lst = tokenizer.tokenize(s1)'''
 
 
 def make_mat(lst):
@@ -107,10 +98,10 @@ def make_mat(lst):
 		mat = np.concatenate((mat, v), axis = 1)
 	return mat, vocalst
 
-def svd(filename):
+def svd(filename, num_of_comp = 3):
 	tokens, data, map_back, stemmed_sentences = process_file(filename)
 #	mat, vocalst = make_mat(lst)
-	rlst = svd_mat(data, tokens, map_back)
+	rlst = svd_mat(data, tokens, map_back, num_of_comp)
   # combine into multiple keywords
 	keywords = postprocess(rlst, stemmed_sentences)
 	return keywords

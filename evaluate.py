@@ -9,6 +9,7 @@ from clustering import kcluster
 from svd import svd
 import feature_extract
 import rake_tr
+import re
 
 nltk.data.path.append('/home/jocelyn/usb/nltk_data')
 def main():
@@ -18,6 +19,7 @@ def main():
   manual_keywords = []
   total_precision = 0
   total_recall = 0
+
 
   for filename in filenames:
 
@@ -32,15 +34,27 @@ def main():
         manual_keywords = list(set(manual_keywords))
         manual_keywords = [t for t in manual_keywords if ( (len(t) > 1) and (t.lower()not in stopwords.words('english')) )]
 
+	'''
+#evaluate with multiple words
+        manual_keywords = [line.split() for line in key_lines]
+	new_words = []
+	for words in manual_keywords:
+	  new_word = words.replace("-", " ")
+	  new_words.append(new_word)
+	
+	rstset = set(new_words)
+
+	'''
+
     elif filename[-3:] == 'txt':
       print(filename)
       with open(semeval_dir + filename, 'r') as f:
         correct = 0
         f = open(semeval_dir + filename, 'r')
         content = f.read()
-#        keywords = svd(content)
+        keywords = svd(content)
 #        keywords = rake_tr.main()
-        keywords = kcluster(content)
+#        keywords = kcluster(content)
         keywords = list(set(keywords))
         keywords = [word.encode('ascii') for word in keywords]
 #        print('--------manual keywords---------')
@@ -54,7 +68,8 @@ def main():
         if len(manual_keywords) == 0:
           print(filename)
           print(last_key_file)
-          exit(0)
+          #exit(0)
+	  continue
         total_precision += correct/float(len(keywords))
         total_recall += correct/float(len(manual_keywords))
 
