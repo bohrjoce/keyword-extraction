@@ -46,11 +46,10 @@ def get_rakeweight_data(doc):
 
   # split sentences, then split sentences into tokens
   # THIS IS FOR COMBINING SINGLE KEYWORDS LATER
-  stemmed_sentences = [word_tokenize(sent) for sent in sentences]
-  stemmer = EnglishStemmer()
-  stemmed_sentences = [list(stemmer.stem(word).encode('ascii') for word in sent) for sent in stemmed_sentences]
-#  stemmed_tokenized_content = [word for word in stemmed_tokenized_content if re.match('^[\w-]+$', word) is not None]
-  stemmed_sentences = [list(word for word in sent if word.isalpha()) for sent in stemmed_sentences]
+  postprocess_sentences = [word_tokenize(sent) for sent in sentences]
+  postprocess_sentences = [list(word.encode('ascii') for word in sent) for sent in postprocess_sentences]
+  postprocess_sentences = [list(word for word in sent if re.match('^[\w-]+$', word) is not None) for sent in postprocess_sentences]
+#  postprocess_sentences = [list(word for word in sent if word.isalpha()) for sent in postprocess_sentences]
 
 
   # remove tokens in each sentence that aren't Noun, Verb or Adj
@@ -69,6 +68,7 @@ def get_rakeweight_data(doc):
     # if we don't want to use the transformation, just keep mapping_back be a mirror from each token to itself
     for sent in sentences:
       tok_list = word_tokenize(sent)
+      tok_list = [word.encode('ascii') for word in tok_list]
       for tok in tok_list:
         mapping_back[tok] = tok
         all_tokens.append(tok)
@@ -103,9 +103,9 @@ def get_rakeweight_data(doc):
       degree = sum(C[word].values())
       freq = C[word][word]
       # various methods to weight. freq and degree work pretty well. degree/freq...not so much
-      cur_vec[word] = float(degree)/float(freq)
-      cur_vec[word] = float(freq)
-#      cur_vec[word] = float(degree)
+#      cur_vec[word] = float(degree)/float(freq)
+#      cur_vec[word] = float(freq)
+      cur_vec[word] = float(degree)
 
     arr = []
     for key in sorted(cur_vec):
@@ -113,7 +113,7 @@ def get_rakeweight_data(doc):
       total_freq[key] += cur_vec[key]
     data[i,:] = np.array(arr)
 
-  return all_tokens, data, mapping_back, stemmed_sentences
+  return all_tokens, data, mapping_back, postprocess_sentences, C
 
 # look at each sentences and remove word that aren't Noun, verb, or adj
 def remove_non_nva_sen(list_sentences):
@@ -175,6 +175,6 @@ def stem_sen(list_sentences):
       tmp_tok = tok + '-' + pos
       # find the most frequently, unstemmed word correspond to the stemmer + tagged
       most_freq = max(mapping_back[tok][pos], key = mapping_back[tok][pos].get)
-      res_map[tmp_tok] = most_freq
+      res_map[tmp_tok] = most_freq.encode('ascii')
       res_list.append(tmp_tok)
   return res_sen, res_list, res_map

@@ -5,31 +5,53 @@ import numpy as np
 import nltk
 import os
 from feature_extract import get_rakeweight_data
-from postprocess import postprocess
+from postprocess import get_keyphrases
+from postprocess import get_keyphrase_weights
+from collections import defaultdict
 
-def kcluster(content, num_cluster = 6, num_key = 12):
+def kcluster(content, num_cluster = 6, num_key = 15):
   # num_key is the number of keyword that we extract from a cluster
   # we can find the union of the extracted keys from each cluster
 
-  one_hot_tokens, weight_array, mapping_back, stemmed_sentences = get_rakeweight_data(content)
+  one_hot_tokens, weight_array, mapping_back, postprocess_sentences, C = get_rakeweight_data(content)
 
   # in case we have less vector than cluste number
   num_cluster = min(num_cluster, len(weight_array))
+  token_weights = defaultdict(float)
+  keyword_weights = defaultdict(float)
   k_clusters = cluster.k_means(weight_array, num_cluster)[0]
   union_array = []
+  keywords = []
   num_key = min(num_key, len(one_hot_tokens))
   for i,vec in enumerate(k_clusters):
     tmp = sorted(range(len(vec)), key=lambda i: vec[i])[-num_key:]
     union_array = list(set(tmp) | set(union_array))
-  res = []
+    for ind in tmp:
+      token = one_hot_tokens[ind]
+      degree = sum(C[token].values())
+      freq = C[token][token]
+      # currently frequency. update to different weight scheme if needed
+      # token_weights[token] = freq(token)*num_clusters_in
+      token_weights[token] += float(degree)
   for ind in union_array:
-    res.append(mapping_back[one_hot_tokens[ind]])
+    token = one_hot_tokens[ind]
+    keyword = mapping_back[token]
+    keywords.append(keyword.encode('ascii'))
+    # keyword_weights[keyword] = sum token_weights[token]
+    # for all tokens that map to keyword
+    keyword_weights[keyword] += token_weights[token]
 
-  keywords = [word.encode('ascii') for word in res]
   keywords = list(set(keywords))
   # get keyphrases
-  keywords = postprocess(keywords, stemmed_sentences)
-  return keywords
+  keyphrases = get_keyphrases(keywords, postprocess_sentences)
+  # keyphrases_weights = sum keyword_weights[word] / total_words
+  # for all words in keywords
+  keyphrases_weights = get_keyphrase_weights(keyphrases, keyword_weights)
+  keyword_weights.update(keyphrases_weights)
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:30]
+#  for keyword in top_keywords:
+#    print(keyword + ' '*(40-len(keyword)) + str(keyword_weights[keyword]))
+  return top_keywords
 
 def main():
   nltk.data.path.append('/home/jocelyn/usb/nltk_data')
