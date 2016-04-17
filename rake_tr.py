@@ -9,6 +9,9 @@ import nltk.data
 import numpy as np
 import copy
 import operator
+from postprocess import get_keyphrases
+from postprocess import get_keyphrase_weights
+from collections import defaultdict
 
 damp = .85
 co_matrix = {} # dictionary of dictionaries representing co-occurence matrix
@@ -50,11 +53,10 @@ def get_rakeweight_data(doc):
 
   # split sentences, then split sentences into tokens
   # THIS IS FOR COMBINING SINGLE KEYWORDS LATER
-  stemmed_sentences = [word_tokenize(sent) for sent in sentences]
-  stemmer = EnglishStemmer()
-  stemmed_sentences = [list(stemmer.stem(word).encode('ascii') for word in sent) for sent in stemmed_sentences]
+  postprocess_sentences = [word_tokenize(sent) for sent in sentences]
+  postprocess_sentences = [list(word.encode('ascii') for word in sent) for sent in postprocess_sentences]
 #  stemmed_tokenized_content = [word for word in stemmed_tokenized_content if re.match('^[\w-]+$', word) is not None]
-  stemmed_sentences = [list(word for word in sent if word.isalpha()) for sent in stemmed_sentences]
+  postprocess_sentences = [list(word for word in sent if word.isalpha()) for sent in postprocess_sentences]
 
   sentences = remove_non_nva_sen(sentences)
 
@@ -76,7 +78,7 @@ def get_rakeweight_data(doc):
   			if word1 != word2:
   				addToMatrix(word1, word2)
 
-  return all_tokens, mapping_back, stemmed_sentences
+  return all_tokens, mapping_back, postprocess_sentences
 
 # given a co-occurence matrix and list of tokens,
 # intitializes vertex weights given RAKE algorithm
@@ -170,14 +172,21 @@ def main(text):
 	num_words = len(vertex_scores)
 
 	keywords = []
-	tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:27]
+	tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:24]
+	keyword_weights = defaultdict(float)
 	for tok, val in tok_max:
-		keywords.append(mapping_back[tok])
+		keyword = mapping_back[tok]
+		keywords.append(keyword)
+		keyword_weights[keyword] += val
 
   # construct multiple keywords
-	keywords = postprocess(keywords, stemmed_keywords)
+	keyphrases = get_keyphrases(keywords, stemmed_sentences)
+	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights)
+	keyword_weights.update(keyphrase_weights)
+	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:25]
+
 #	print keywords
-	return keywords
+	return top_keywords
 
 if __name__ == '__main__':
 	text = "The presidential race is coming soon. Who do you think will win? It will be a close presidential race."
