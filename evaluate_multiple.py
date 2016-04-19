@@ -9,7 +9,7 @@ from clustering import kcluster
 from nltk.stem.snowball import EnglishStemmer
 from svd import svd
 import feature_extract
-import rake_tr
+import raketr
 import re
 import rake
 
@@ -64,10 +64,10 @@ def main():
         f = open(semeval_dir + filename, 'r')
         content = f.read()
 #        keywords = svd(content)
-        # keywords = rake_tr.main(content)
+        keywords = raketr.main(content)
 #        keywords = kcluster(content)
-        keywords = rake.main(content)
-        # print(keywords)
+#        keywords = rake.main(content)
+        print(keywords)
         print('-'*100)
 #        print('--------manual keywords---------')
 #        print(manual_keywords)
