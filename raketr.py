@@ -4,6 +4,7 @@ from nltk.tokenize.api import StringTokenizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.tokenize.punkt import PunktSentenceTokenizer
+from feature_extract import stem_sen, remove_non_nva_sen
 import nltk.data
 import numpy as np
 import copy
@@ -42,7 +43,11 @@ def get_rakeweight_data(doc):
 
 
 	# replace non-ascii and newline characters with space
-	content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in doc])
+	content = doc.lower()
+	content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in content])
+
+	sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+	sentences = sent_detector.tokenize(content)
 
   # split sentences, then split sentences into tokens
   # THIS IS FOR COMBINING SINGLE KEYWORDS LATER
@@ -58,15 +63,6 @@ def get_rakeweight_data(doc):
   # also need to keep a mapping back from stemmed-tagged version to un-stemmed but lemmatized
 	mapping_back = {}
 	sentences, all_tokens, mapping_back = stem_sen(sentences)
-	all_tokens = sorted(list(set(all_tokens)))
-	# remove stopwords
-	sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()not in stopwords.words('english')) )) for sent in sentences]
-
-	# tokenize words in sentences
-	sentences = [word_tokenize(sent) for sent in sentences]
-
-	# remove stopwords
-	sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower() not in stopwords.words('english')) )) for sent in sentences]
 
 	# get list of all tokens
 	all_tokens = [t for sent in sentences for t in sent]
@@ -74,14 +70,15 @@ def get_rakeweight_data(doc):
 	# remove duplicates and sort
 	all_tokens = sorted(list(set(all_tokens)))
 
+	# remove stopwords
+	sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()not in stopwords.words('english')) )) for sent in sentences]
+
 	# construct co-occurrence matrix
 	for sent in sentences:
 		for word1 in sent:
 			for word2 in sent:
 				if word1 != word2:
 					addToMatrix(word1, word2)
-
-	return all_tokens
 
 	return all_tokens, mapping_back, postprocess_sentences
 
@@ -133,7 +130,7 @@ def printScores(vertex_scores):
 
 def getRake(text):
 	text = text.lower()
-	
+
 	tokens = get_rakeweight_data(text)
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
@@ -144,7 +141,7 @@ def getRake(text):
 	rake_keywords = []
 	# according to TextRank, # of keywords should be size of set divided by 3
 	count = 1
-	for i in dic: 
+	for i in dic:
 		if (count > (num_words / 3) + 1):
 			break
 		rake_keywords.append(i[0])
@@ -166,7 +163,6 @@ def main(text):
 	counter = 0
 	while not has_converged:
 		has_converged = True
-		print "ROUND " + str(counter)
 		# printScores(vertex_scores)
 		temp_scores = dict(vertex_scores)
 		for t in tokens:
@@ -195,7 +191,7 @@ def main(text):
 	keyphrases,keyphrase_freq = get_keyphrases(keywords, stemmed_sentences)
 	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
 	keyword_weights.update(keyphrase_weights)
-	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:25]
+	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:15]
 
 #	print keywords
 	return top_keywords
