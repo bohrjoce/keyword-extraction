@@ -9,6 +9,7 @@ from clustering import kcluster
 from svd import svd
 import feature_extract
 import rake_tr
+import raketr
 
 nltk.data.path.append('/home/jocelyn/usb/nltk_data')
 def main():
@@ -39,8 +40,8 @@ def main():
         f = open(semeval_dir + filename, 'r')
         content = f.read()
 #        keywords = svd(content)
-#        keywords = rake_tr.main()
-        keywords = kcluster(content)
+        keywords = raketr.main(content)
+        # keywords = kcluster(content)
         keywords = list(set(keywords))
         keywords = [word.encode('ascii') for word in keywords]
 #        print('--------manual keywords---------')
