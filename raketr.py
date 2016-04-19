@@ -8,6 +8,9 @@ import nltk.data
 import numpy as np
 import copy
 import operator
+from postprocess import get_keyphrases
+from postprocess import get_keyphrase_weights
+from collections import defaultdict
 
 damp = .85
 co_matrix = {} # dictionary of dictionaries representing co-occurence matrix
@@ -24,7 +27,12 @@ def addToMatrix(word1, word2):
 			co_matrix[word1][word2] += 1
 		else:
 			co_matrix[word1][word2] = 1
+<<<<<<< HEAD:raketr.py
 	else: 
+=======
+			co_matrix_count[word1] =+ 1
+	else:
+>>>>>>> ed5bc995ebe3dca7e81d08b1fa249b67b789d971:rake_tr.py
 		co_matrix[word1] = {}
 		co_matrix[word1][word2] = 1
 		co_matrix_count[word1] = 1
@@ -41,11 +49,31 @@ def get_rakeweight_data(doc):
 	# replace non-ascii and newline characters with space
 	content = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in doc])
 
+<<<<<<< HEAD:raketr.py
 	# return pretrained sentence tokenizer
 	sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
 
 	# segment content into sentences
 	sentences = sent_detector.tokenize(content)
+=======
+  # split sentences, then split sentences into tokens
+  # THIS IS FOR COMBINING SINGLE KEYWORDS LATER
+  postprocess_sentences = [word_tokenize(sent) for sent in sentences]
+  postprocess_sentences = [list(word.encode('ascii') for word in sent) for sent in postprocess_sentences]
+#  stemmed_tokenized_content = [word for word in stemmed_tokenized_content if re.match('^[\w-]+$', word) is not None]
+  postprocess_sentences = [list(word for word in sent if word.isalpha()) for sent in postprocess_sentences]
+
+  sentences = remove_non_nva_sen(sentences)
+
+  # do the transformation as follow:
+  # replace each token in each sentence by their lemmatized->stemmed->tagged version.
+  # also need to keep a mapping back from stemmed-tagged version to un-stemmed but lemmatized
+  mapping_back = {}
+  sentences, all_tokens, mapping_back = stem_sen(sentences)
+  all_tokens = sorted(list(set(all_tokens)))
+  # remove stopwords
+  sentences = [list(t for t in sent if ( (len(t) > 1) and (t.lower()not in stopwords.words('english')) )) for sent in sentences]
+>>>>>>> ed5bc995ebe3dca7e81d08b1fa249b67b789d971:rake_tr.py
 
 	# tokenize words in sentences
 	sentences = [word_tokenize(sent) for sent in sentences]
@@ -68,6 +96,10 @@ def get_rakeweight_data(doc):
 
 	return all_tokens
 
+<<<<<<< HEAD:raketr.py
+=======
+  return all_tokens, mapping_back, postprocess_sentences
+>>>>>>> ed5bc995ebe3dca7e81d08b1fa249b67b789d971:rake_tr.py
 
 # given a co-occurence matrix and list of tokens,
 # intitializes vertex weights given RAKE algorithm
@@ -79,11 +111,16 @@ def getTokenWeight(vertex_scores, tokens):
 			for t2 in co_matrix[t1]:
 				degree += co_matrix[t1][t2]
 				freq += 1
+<<<<<<< HEAD:raketr.py
 			vertex_scores[t1] = float(degree) / freq
 	
+=======
+			vertex_scores[t1] = float(degree) / float(freq)
+
+>>>>>>> ed5bc995ebe3dca7e81d08b1fa249b67b789d971:rake_tr.py
 
 # uodates a vertice based on the TextRank algorithm with weighted edges and vertices
-# W(Vi) = (1-d) + d * sum(weight of edge from i to j for all adjacent j/ sum(weight of edges from j to k for all adjacent k)) * W(j) 
+# W(Vi) = (1-d) + d * sum(weight of edge from i to j for all adjacent j/ sum(weight of edges from j to k for all adjacent k)) * W(j)
 # returns true if token node is converging, false otherwise
 def updateNode(vertex_scores, temp_scores, token):
 	total = 0
@@ -139,8 +176,13 @@ def getRake(text):
 
 def main(text):
 	text = text.lower()
+<<<<<<< HEAD:raketr.py
 	
 	tokens = get_rakeweight_data(text)
+=======
+
+	tokens, mapping_back, stemmed_sentences = get_rakeweight_data(text)
+>>>>>>> ed5bc995ebe3dca7e81d08b1fa249b67b789d971:rake_tr.py
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
 	# printScores(vertex_scores)
@@ -167,9 +209,23 @@ def main(text):
 
 	# printScores(vertex_scores)
 
+<<<<<<< HEAD:raketr.py
 	dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
+=======
+#	dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
+#	num_words = len(vertex_scores)
+#	keywords = []
+	# according to TextRank, # of keywords should be size of set divided by 3
+#	count = 1
+#	for i in dic:
+#		if (count > 30):
+#			break
+#		keywords.append(mapping_back[i[0]])
+#		count += 1
+>>>>>>> ed5bc995ebe3dca7e81d08b1fa249b67b789d971:rake_tr.py
 	num_words = len(vertex_scores)
 	keywords = []
+<<<<<<< HEAD:raketr.py
 	# according to TextRank, # of keywords should be size of set divided by 3
 	count = 1
 	for i in dic: 
@@ -180,6 +236,23 @@ def main(text):
 
 	print keywords	
 	return keywords
+=======
+	tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:24]
+	keyword_weights = defaultdict(float)
+	for tok, val in tok_max:
+		keyword = mapping_back[tok]
+		keywords.append(keyword)
+		keyword_weights[keyword] += val
+
+  # construct multiple keywords
+	keyphrases = get_keyphrases(keywords, stemmed_sentences)
+	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights)
+	keyword_weights.update(keyphrase_weights)
+	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:25]
+
+#	print keywords
+	return top_keywords
+>>>>>>> ed5bc995ebe3dca7e81d08b1fa249b67b789d971:rake_tr.py
 
 if __name__ == '__main__':
 	text = "The presidential race is coming soon. Who do you think will win? It will be a close presidential race."

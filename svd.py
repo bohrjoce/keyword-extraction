@@ -10,19 +10,20 @@ from nltk.stem.porter import *
 import math
 import numpy as np
 from feature_extract import get_rakeweight_data
+from postprocess import get_keyphrases
+from collections import defaultdict
+from postprocess import get_keyphrases
+from postprocess import get_keyphrase_weights
 #read document
 
 #interfaces:
 #svd function, out put the principal component
-def svd_mat(mat, vocalst, map_back):
+def svd_mat(mat, vocalst, map_back, C, num_of_comp = 3):
 
 	mat = np.transpose(mat)
 	U,s,V = np.linalg.svd(mat, full_matrices=True)
-	idx = 0;
-	for i in range(1, len(s)):
-		if (s[i] < s[0]*0.5):
-			idx = i
-			break;
+	keyword_weights = defaultdict(float)
+	idx = num_of_comp;
 	S = np.diag(s[0:idx])
 	up = U[:, 0:idx]
 	vp = V[0:idx, :]
@@ -31,9 +32,13 @@ def svd_mat(mat, vocalst, map_back):
 	sortidx = list(np.argsort(flst))
 	sortidx.reverse()
 	rlst = []
-	for i in range(0,7):
-		rlst.append(map_back[vocalst[sortidx[i]]])
-	return rlst
+	for i in range(0,25):
+		token = vocalst[sortidx[i]]
+		keyword = map_back[token]
+		freq = C[token][token]
+		degree = sum(C[token].values())
+		keyword_weights[keyword] += float(degree)
+		rlst.append(keyword)
 	'''
 	u1 = U[:, 0]
 	u1x = np.absolute(u1)
@@ -54,20 +59,17 @@ def svd_mat(mat, vocalst, map_back):
 
 	for i in range(0, 20):
 		print s[i]
+	return rlst
 	'''
+	return rlst, keyword_weights
 
 #process the file get a list of sentences
-def process_file(filename):
+def process_file(docstr):
 
 	#f = open(filename)
 	#s = f.read()
-	s = filename
+	s = docstr
 	return get_rakeweight_data(s)
-	asdasd = '''s = ''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in s])
-	s1 = s.replace('\n', ' ')
-	s1 = re.sub("\<.+\>", "", s1)
-	tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-	lst = tokenizer.tokenize(s1)'''
 
 
 def make_mat(lst):
@@ -100,16 +102,19 @@ def make_mat(lst):
 		counter = Counter(solst)
 		for wd in counter.keys():
 			idx = vocalst.index(wd)
-			#score = math.log(N*1.0/vocabulary[wd]) * counter[wd] 	#tfidf -- will give the author as high rank
-			score = counter[wd]	#naive weighting		#will give the frequent term as high rank
+			score = math.log(N*1.0/vocabulary[wd]) * counter[wd] 	#tfidf -- will give the author as high rank
+			#score = counter[wd]	#naive weighting		#will give the frequent term as high rank
 			v[idx] = score
 		mat = np.concatenate((mat, v), axis = 1)
 	return mat, vocalst
 
-def svd(filename):
-	tokens, data, map_back = process_file(filename)
+def svd(filename, num_of_comp = 3):
+	tokens, data, map_back, postprocess_sentences, C = process_file(filename)
 #	mat, vocalst = make_mat(lst)
-	rlst = svd_mat(data, tokens, map_back)
-	return rlst
-
-
+	keywords, keyword_weights = svd_mat(data, tokens, map_back, C, num_of_comp)
+  # combine into multiple keywords
+	keyphrases = get_keyphrases(keywords, postprocess_sentences)
+	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights)
+	keyword_weights.update(keyphrase_weights)
+	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:30]
+	return top_keywords

@@ -6,13 +6,29 @@ import nltk
 import os
 from nltk.corpus import stopwords
 from clustering import kcluster
+from nltk.stem.snowball import EnglishStemmer
 from svd import svd
 import feature_extract
 import rake_tr
-import raketr
 import re
 
 nltk.data.path.append('/home/jocelyn/usb/nltk_data')
+
+def get_stemmed_keywords(keywords):
+
+  stemmer = EnglishStemmer()
+  stemmed_keywords = list(keywords)
+  # replace - with space ???
+#  stemmed_keywords = [keyword.replace('-', ' ') for keyword in stemmed_keywords]
+  # split into list of list
+  stemmed_keywords = [keyword.split() for keyword in stemmed_keywords]
+  # stem individual words
+  stemmed_keywords = [list(stemmer.stem(word) for word in keyword) for keyword in stemmed_keywords]
+  # list of words to string
+  stemmed_keywords = [' '.join(keyword) for keyword in stemmed_keywords]
+
+  return stemmed_keywords
+
 def main():
 
   semeval_dir = 'data/maui-semeval2010-test/'
@@ -28,24 +44,7 @@ def main():
       with open(semeval_dir + filename, 'r') as f:
         last_key_file = filename
         key_lines = f.read().splitlines()
-        # list of list of keywords by line
-        manual_keywords = [line.split() for line in key_lines]
-        # flatten list
-        manual_keywords = [word for line in manual_keywords for word in line]
-        manual_keywords = list(set(manual_keywords))
-        manual_keywords = [t for t in manual_keywords if ( (len(t) > 1) and (t.lower()not in stopwords.words('english')) )]
-
-	'''
-#evaluate with multiple words
-        manual_keywords = [line.split() for line in key_lines]
-	new_words = []
-	for words in manual_keywords:
-	  new_word = words.replace("-", " ")
-	  new_words.append(new_word)
-	
-	rstset = set(new_words)
-
-	'''
+        manual_keywords = get_stemmed_keywords(key_lines)
 
     elif filename[-3:] == 'txt':
       print(filename)
@@ -54,24 +53,24 @@ def main():
         f = open(semeval_dir + filename, 'r')
         content = f.read()
 #        keywords = svd(content)
-        # keywords = raketr.main(content)
-        # keywords = kcluster(content)
-        keywords = svd(content)
-        keywords = list(set(keywords))
-        keywords = [word.encode('ascii') for word in keywords]
+        keywords = rake_tr.main(content)
+#        keywords = kcluster(content)
+        print(keywords)
+        print('-'*100)
 #        print('--------manual keywords---------')
 #        print(manual_keywords)
 #        print('--------extracted keywords---------')
 #        print(keywords)
-        print "FILENAME: " + filename
-        for keyword in keywords:
+        stemmed_keywords = get_stemmed_keywords(keywords)
+#        print "FILENAME: " + filename
+        for keyword in stemmed_keywords:
           if keyword in set(manual_keywords):
             correct += 1
         if len(manual_keywords) == 0:
           print(filename)
           print(last_key_file)
-          #exit(0)
-	  continue
+          print('^^^^ issue with this file ^^^^')
+          exit(0)
         total_precision += correct/float(len(keywords))
         total_recall += correct/float(len(manual_keywords))
 
