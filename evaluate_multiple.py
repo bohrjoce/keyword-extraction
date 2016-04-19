@@ -26,7 +26,7 @@ def get_stemmed_keywords(keywords):
   # stem individual words
   stemmed_keywords = [list(stemmer.stem(word) for word in keyword) for keyword in stemmed_keywords]
   # list of words to string
-  stemmed_keywords = [' '.join(keyword) for keyword in stemmed_keywords]
+  stemmed_keywords = [' '.join(keyword).encode('ascii') for keyword in stemmed_keywords]
 
   return stemmed_keywords
 

@@ -7,6 +7,7 @@ def get_keyphrases(keywords, sentences):
   is_keyword = [list(True if word in keywords else False for word in sent) for sent in sentences]
   keyphrases = []
   keyphrase = []
+  keyphrase_freq = defaultdict(int)
   run = 0
   for i,sent in enumerate(is_keyword):
     for j,val in enumerate(sent):
@@ -18,21 +19,23 @@ def get_keyphrases(keywords, sentences):
         elif word in keyphrase:
           if run > 1:
             keyphrases.append(' '.join(keyphrase))
+            keyphrase_freq[' '.join(keyphrase)] += 1
           run = 1
           keyphrase = [word]
 
       if val is False:
         if run > 1:
           keyphrases.append(' '.join(keyphrase))
+          keyphrase_freq[' '.join(keyphrase)] += 1
         run = 0
         keyphrase = []
     # reset run at end of sentence
     run = 0
     keyphrase = []
   keyphrases = list(set(keyphrases))
-  return keyphrases
+  return keyphrases, keyphrase_freq
 
-def get_keyphrase_weights(keyphrases, keyword_weights):
+def get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq):
 
   # keyphrases_weights = sum keyword_weights[word] / total_words
   # for all words in keywords, add optional bonus for long keyword
@@ -45,7 +48,9 @@ def get_keyphrase_weights(keyphrases, keyword_weights):
     keyphrase_weight /= len(keyphrase_list)
     # bonus for long keywords
 #    keyphrase_weight += len(keyphrase_list)
-    keyphrase_weights[keyphrase] = keyphrase_weight
+    if keyphrase_freq[keyphrase] == 0:
+      keyphrase_freq[keyphrase] = 1
+    keyphrase_weights[keyphrase] = keyphrase_weight*keyphrase_freq[keyphrase]
     keyphrase_weight = 0
 
   return keyphrase_weights
