@@ -25,7 +25,7 @@ def get_stemmed_keywords(keywords):
   # stem individual words
   stemmed_keywords = [list(stemmer.stem(word) for word in keyword) for keyword in stemmed_keywords]
   # list of words to string
-  stemmed_keywords = [' '.join(keyword) for keyword in stemmed_keywords]
+  stemmed_keywords = [' '.join(keyword).encode('ascii') for keyword in stemmed_keywords]
 
   return stemmed_keywords
 
@@ -53,10 +53,8 @@ def main():
         f = open(semeval_dir + filename, 'r')
         content = f.read()
 #        keywords = svd(content)
-        keywords = rake_tr.main(content)
-#        keywords = kcluster(content)
-        print(keywords)
-        print('-'*100)
+#        keywords = rake_tr.main(content)
+        keywords = kcluster(content)
 #        print('--------manual keywords---------')
 #        print(manual_keywords)
 #        print('--------extracted keywords---------')

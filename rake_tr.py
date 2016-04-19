@@ -180,8 +180,8 @@ def main(text):
 		keyword_weights[keyword] += val
 
   # construct multiple keywords
-	keyphrases = get_keyphrases(keywords, stemmed_sentences)
-	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights)
+	keyphrases,keyphrase_freq = get_keyphrases(keywords, stemmed_sentences)
+	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
 	keyword_weights.update(keyphrase_weights)
 	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:25]
 

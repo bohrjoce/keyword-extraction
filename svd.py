@@ -113,8 +113,8 @@ def svd(filename, num_of_comp = 3):
 #	mat, vocalst = make_mat(lst)
 	keywords, keyword_weights = svd_mat(data, tokens, map_back, C, num_of_comp)
   # combine into multiple keywords
-	keyphrases = get_keyphrases(keywords, postprocess_sentences)
-	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights)
+	keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
+	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
 	keyword_weights.update(keyphrase_weights)
-	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:30]
+	top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:15]
 	return top_keywords
