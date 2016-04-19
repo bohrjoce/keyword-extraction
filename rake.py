@@ -176,8 +176,10 @@ def reweightTR(keyword_weights, comatrix, comatrix_count, tokens):
 	has_converged = False
 	counter = 0
 	while not has_converged:
+		if counter == 30:
+			break
 		has_converged = True
-		# print "ROUND " + str(counter)
+		print "ROUND " + str(counter)
 		temp_scores = dict(keyword_weights)
 		for token in keyword_weights:
 			# if token is not None:
@@ -197,21 +199,25 @@ def reweightTR(keyword_weights, comatrix, comatrix_count, tokens):
 def main(text):
 	tokens, sentences = get_rakeweight_data(text)
 	keyphrases = initializePhrases(sentences, tokens)
-	print keyphrases
 	comatrix, comatrix_count = initializeCoMatrix(keyphrases)
 	keyword_weights = getKeywordWeights(comatrix, comatrix_count)
 
-	keyword_weights = reweightTR(keyword_weights, comatrix, comatrix_count, tokens)
-
+	# keyword_weights = reweightTR(keyword_weights, comatrix, comatrix_count, tokens) # THIS IS WHERE RAKE GETS REWEIGHTED
+																					# REMOVE TO GET RAKE VALUES
 	keyphrase_weights = getKeyphraseWeights(keyphrases, keyword_weights)
 	sorted_x = sorted(keyphrase_weights.items(), key=operator.itemgetter(1), reverse=True)
 	keywords = []
+
+	counter = 0
 	for pair in sorted_x:
+		if counter > 25:
+			break
+		counter += 1
 		keywords.append(pair[0])
 		if pair[1] > 0:
 			print "KEYWORD: " + pair[0] + " WEIGHT: " + str(pair[1])
 
-	print keywords
+	# print keywords
 	return keywords
 
 if __name__ == '__main__':
@@ -223,6 +229,9 @@ of solutions and algorithms of construction of minimal generating sets of soluti
 types of systems are given. These criteria and the corresponding algorithms for
 constructing a minimal supporting set of solutions can be used in solving all the
 considered types of systems and systems of mixed types.'''
+	with open("data/maui-semeval2010-test/C-1.txt") as test_f:
+		text = test_f.read();
+	# print text
 	main(text)
 
 

@@ -1,5 +1,5 @@
 #!/bin/python
-
+# -*- coding: utf-8 -*-
 from sklearn import cluster
 import numpy as np
 import nltk
@@ -11,6 +11,7 @@ from svd import svd
 import feature_extract
 import rake_tr
 import re
+import rake
 
 nltk.data.path.append('/home/jocelyn/usb/nltk_data')
 
@@ -36,26 +37,37 @@ def main():
   manual_keywords = []
   total_precision = 0
   total_recall = 0
-
+  total_docs = 0
 
   for filename in filenames:
-
     if filename[-3:] == 'key':
+      if filename == "H-5.key":
+        continue
       with open(semeval_dir + filename, 'r') as f:
         last_key_file = filename
         key_lines = f.read().splitlines()
+        #for word in key_lines:
+          #print word
+          #word = unicode(word, 'utf-8')
+          # if filename == "H-5.key":
+          #   print word
+        key_lines = [word.encode('ascii') for word in key_lines]
         manual_keywords = get_stemmed_keywords(key_lines)
 
     elif filename[-3:] == 'txt':
+      if filename == "H-5.txt":
+        continue
+      total_docs += 1
       print(filename)
       with open(semeval_dir + filename, 'r') as f:
         correct = 0
         f = open(semeval_dir + filename, 'r')
         content = f.read()
 #        keywords = svd(content)
-        keywords = rake_tr.main(content)
+        # keywords = rake_tr.main(content)
 #        keywords = kcluster(content)
-        print(keywords)
+        keywords = rake.main(content)
+        # print(keywords)
         print('-'*100)
 #        print('--------manual keywords---------')
 #        print(manual_keywords)
@@ -74,7 +86,8 @@ def main():
         total_precision += correct/float(len(keywords))
         total_recall += correct/float(len(manual_keywords))
 
-  total_docs = len(filenames)/2
+
+  # total_docs = len(filenames)/2
   total_precision /= total_docs
   total_recall /= total_docs
   total_fmeasure = round(2*total_precision*total_recall/(total_precision + total_recall), 2)
