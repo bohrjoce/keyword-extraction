@@ -67,11 +67,11 @@ def main():
         f = open(semeval_dir + filename, 'r')
         content = f.read()
         if method == 'svd':
-          keywords = svd(content)
+          keywords = svd(content, 1, False)
         elif method == 'textrake':
-          keywords = raketr.main(content)
+          keywords = raketr.main(content, False)
         elif method == 'cluster':
-         keywords = kcluster(content)
+         keywords = kcluster(content, 6, 15, False)
 #        keywords = rake.main(content)
 #        keywords = rake_object.run(content)[:15]
 #        keywords = [word[0] for word in keywords]

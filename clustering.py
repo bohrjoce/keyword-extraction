@@ -9,7 +9,7 @@ from postprocess import get_keyphrases
 from postprocess import get_keyphrase_weights
 from collections import defaultdict
 
-def kcluster(content, num_cluster = 6, num_key = 15):
+def kcluster(content, num_cluster = 6, num_key = 15, single = False):
   # num_key is the number of keyword that we extract from a cluster
   # we can find the union of the extracted keys from each cluster
 
@@ -32,7 +32,7 @@ def kcluster(content, num_cluster = 6, num_key = 15):
       freq = C[token][token]
       # currently frequency. update to different weight scheme if needed
       # token_weights[token] = freq(token)*num_clusters_in
-      token_weights[token] += float(degree)
+      token_weights[token] += float(freq)
   for ind in union_array:
     token = one_hot_tokens[ind]
     keyword = mapping_back[token]
@@ -42,6 +42,8 @@ def kcluster(content, num_cluster = 6, num_key = 15):
     keyword_weights[keyword] += token_weights[token]
 
   keywords = list(set(keywords))
+  if single:
+    return keywords
   # get keyphrases
   keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
   # keyphrases_weights = sum keyword_weights[word] / total_words

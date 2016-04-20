@@ -51,11 +51,11 @@ def main():
         f = open(semeval_dir + filename, 'r')
         content = f.read()
         if method == 'svd':
-          keywords = svd(content)
+          keywords = svd(content, 1, True)
         elif method == 'textrake':
-          keywords = raketr.main(content)
+          keywords = raketr.main(content, True)
         elif method == 'cluster':
-          keywords = kcluster(content)
+          keywords = kcluster(content, 6, 10, True)
         else:
           print('methods accepted: svd textrake cluster')
           exit(0)

@@ -150,7 +150,7 @@ def getRake(text):
 	print rake_keywords
 	return rake_keywords
 
-def main(text):
+def main(text, single = False):
 	text = text.lower()
 
 	tokens, mapping_back, stemmed_sentences = get_rakeweight_data(text)
@@ -187,6 +187,8 @@ def main(text):
 		keywords.append(keyword)
 		keyword_weights[keyword] += val
 
+	if single:
+		return keywords
   # construct multiple keywords
 	keyphrases,keyphrase_freq = get_keyphrases(keywords, stemmed_sentences)
 	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)

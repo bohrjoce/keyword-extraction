@@ -108,10 +108,12 @@ def make_mat(lst):
 		mat = np.concatenate((mat, v), axis = 1)
 	return mat, vocalst
 
-def svd(filename, num_of_comp = 3):
+def svd(filename, num_of_comp = 3, single = False):
 	tokens, data, map_back, postprocess_sentences, C = process_file(filename)
 #	mat, vocalst = make_mat(lst)
 	keywords, keyword_weights = svd_mat(data, tokens, map_back, C, num_of_comp)
+	if single:
+		return keywords
   # combine into multiple keywords
 	keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
 	keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)

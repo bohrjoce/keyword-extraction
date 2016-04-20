@@ -20,7 +20,8 @@ def get_rakeweight_data(doc):
 
 
   # remove everything above abstract and below references
-  abstractRE = re.compile(r'(.*ABSTRACT)(.*)')
+  # we tried this, but it did not improve performance. performance decreased by ~1%
+  comment = '''abstractRE = re.compile(r'(.*ABSTRACT)(.*)')
   abstractREv2 = re.compile(r'(.*Abstract)(.*)')
   abstract = abstractRE.match(doc)
   if abstract is None:
@@ -33,7 +34,7 @@ def get_rakeweight_data(doc):
   if references is None:
     references = referencesREv2.match(doc)
   if references is not None:
-    doc = references.group(1)
+    doc = references.group(1)'''
 
   content = doc.lower()
 
@@ -90,6 +91,7 @@ def get_rakeweight_data(doc):
     for word1 in sorted(sent):
       for word2 in sorted(sent):
         C[word1][word2] += 1
+
 
   # training data matrix
   data = np.zeros((len(sentences), len(all_tokens)))
