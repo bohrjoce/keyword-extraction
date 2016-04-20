@@ -1,8 +1,11 @@
-# keyword-extraction
+# Keyword-extraction
 Information Retrieval - Keyword Extraction Project
 
 #Goal of the project
 Introduce the use of k-means clustering, SVD and TextRake (RAKE weight + TextRank reweight) for the keyword extraction task
+
+#Requirement
+Make surey you have the proper nltk package installed (for example, we used punkt for tokenizing, stemmers, lemmatizers etc...)
 
 #Evaluation
 Using the SemEval2010 dataset. Around 300 documents!
