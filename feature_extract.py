@@ -50,7 +50,6 @@ def get_rakeweight_data(doc):
   postprocess_sentences = [word_tokenize(sent) for sent in sentences]
   postprocess_sentences = [list(word.encode('ascii') for word in sent) for sent in postprocess_sentences]
   postprocess_sentences = [list(word for word in sent if re.match('^[\w-]+$', word) is not None) for sent in postprocess_sentences]
-#  postprocess_sentences = [list(word for word in sent if word.isalpha()) for sent in postprocess_sentences]
 
 
   # remove tokens in each sentence that aren't Noun, Verb or Adj

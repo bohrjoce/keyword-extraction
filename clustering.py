@@ -31,13 +31,11 @@ def kcluster(content, num_cluster = 6, num_key = 15, single = False):
       degree = sum(C[token].values())
       freq = C[token][token]
       # currently frequency. update to different weight scheme if needed
-      # token_weights[token] = freq(token)*num_clusters_in
       token_weights[token] += float(freq)
   for ind in union_array:
     token = one_hot_tokens[ind]
     keyword = mapping_back[token]
     keywords.append(keyword.encode('ascii'))
-    # keyword_weights[keyword] = sum token_weights[token]
     # for all tokens that map to keyword
     keyword_weights[keyword] += token_weights[token]
 

@@ -47,11 +47,6 @@ def main():
       with open(semeval_dir + filename, 'r') as f:
         last_key_file = filename
         key_lines = f.read().splitlines()
-        #for word in key_lines:
-          #print word
-          #word = unicode(word, 'utf-8')
-          # if filename == "H-5.key":
-          #   print word
         key_lines = [word.encode('ascii') for word in key_lines]
         manual_keywords = get_stemmed_keywords(key_lines)
 
@@ -67,16 +62,16 @@ def main():
         content = f.read()
         if method == 'svd':
           keywords = svd(content, 1, False)
-        elif method == 'textrake':
+        elif method == 'raketr':
           keywords = raketr.main(content, False)
         elif method == 'cluster':
          keywords = kcluster(content, 6, 15, False)
-#        keywords = rake.main(content)
+#        benchmark against RAKE
 #        keywords = rake_object.run(content)[:15]
 #        keywords = [word[0] for word in keywords]
 #        keywords = [''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in keyword]).encode('ascii') for keyword in keywords]
         else:
-          print('methods accepted: svd textrake cluster')
+          print('methods accepted: svd raketr cluster')
           exit(0)
         print(keywords)
         print('-'*100)
@@ -97,7 +92,6 @@ def main():
         total_recall += correct/float(len(manual_keywords))
 
 
-  # total_docs = len(filenames)/2
   total_precision /= total_docs
   total_recall /= total_docs
   total_fmeasure = round(2*total_precision*total_recall/(total_precision + total_recall), 5)

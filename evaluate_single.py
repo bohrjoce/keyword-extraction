@@ -52,12 +52,12 @@ def main():
         content = f.read()
         if method == 'svd':
           keywords = svd(content, 1, True)
-        elif method == 'textrake':
+        elif method == 'raketr':
           keywords = raketr.main(content, True)
         elif method == 'cluster':
           keywords = kcluster(content, 6, 10, True)
         else:
-          print('methods accepted: svd textrake cluster')
+          print('methods accepted: svd raketr cluster')
           exit(0)
         keywords = list(set(keywords))
         keywords = [word.encode('ascii') for word in keywords]
