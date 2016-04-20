@@ -1,6 +1,5 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
-import rake
 from sklearn import cluster
 import numpy as np
 import nltk
