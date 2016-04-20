@@ -1,5 +1,6 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
+import rake
 from sklearn import cluster
 import numpy as np
 import nltk
@@ -11,7 +12,8 @@ from svd import svd
 import feature_extract
 import raketr
 import re
-import rake
+#import rake
+import sys
 
 nltk.data.path.append('/home/jocelyn/usb/nltk_data')
 
@@ -19,8 +21,6 @@ def get_stemmed_keywords(keywords):
 
   stemmer = EnglishStemmer()
   stemmed_keywords = list(keywords)
-  # replace - with space ???
-#  stemmed_keywords = [keyword.replace('-', ' ') for keyword in stemmed_keywords]
   # split into list of list
   stemmed_keywords = [keyword.split() for keyword in stemmed_keywords]
   # stem individual words
@@ -38,10 +38,12 @@ def main():
   total_precision = 0
   total_recall = 0
   total_docs = 0
+  method = str(sys.argv[1])
 
   for filename in filenames:
     if filename[-3:] == 'key':
-      if filename == "H-5.key":
+      # ignored due to issue on Mac or empty keyfile
+      if filename == "H-5.key" or filename == "C-86.key":
         continue
       with open(semeval_dir + filename, 'r') as f:
         last_key_file = filename
@@ -55,7 +57,8 @@ def main():
         manual_keywords = get_stemmed_keywords(key_lines)
 
     elif filename[-3:] == 'txt':
-      if filename == "H-5.txt":
+      # ignored due to issue on Mac or empty keyfile
+      if filename == "H-5.txt" or filename == "C-86.txt":
         continue
       total_docs += 1
       print(filename)
@@ -63,10 +66,19 @@ def main():
         correct = 0
         f = open(semeval_dir + filename, 'r')
         content = f.read()
-#        keywords = svd(content)
-        keywords = raketr.main(content)
-#        keywords = kcluster(content)
+        if method == 'svd':
+          keywords = svd(content)
+        elif method == 'textrake':
+          keywords = raketr.main(content)
+        elif method == 'cluster':
+         keywords = kcluster(content)
 #        keywords = rake.main(content)
+#        keywords = rake_object.run(content)[:15]
+#        keywords = [word[0] for word in keywords]
+#        keywords = [''.join([i if ord(i) < 128 and i != '\n' else ' ' for i in keyword]).encode('ascii') for keyword in keywords]
+        else:
+          print('methods accepted: svd textrake cluster')
+          exit(0)
         print(keywords)
         print('-'*100)
 #        print('--------manual keywords---------')
@@ -74,7 +86,6 @@ def main():
 #        print('--------extracted keywords---------')
 #        print(keywords)
         stemmed_keywords = get_stemmed_keywords(keywords)
-#        print "FILENAME: " + filename
         for keyword in stemmed_keywords:
           if keyword in set(manual_keywords):
             correct += 1
@@ -90,7 +101,7 @@ def main():
   # total_docs = len(filenames)/2
   total_precision /= total_docs
   total_recall /= total_docs
-  total_fmeasure = round(2*total_precision*total_recall/(total_precision + total_recall), 2)
+  total_fmeasure = round(2*total_precision*total_recall/(total_precision + total_recall), 5)
   print('total docs: ' + str(total_docs))
   print('total precision: ' + str(total_precision))
   print('total recall: ' + str(total_recall))
