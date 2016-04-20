@@ -30,8 +30,8 @@ def kcluster(content, num_cluster = 6, num_key = 15, single = False):
       token = one_hot_tokens[ind]
       degree = sum(C[token].values())
       freq = C[token][token]
-      # currently frequency. update to different weight scheme if needed
-      token_weights[token] += float(freq)
+      # currently degree. update to different weight scheme if needed
+      token_weights[token] += float(degree)
   for ind in union_array:
     token = one_hot_tokens[ind]
     keyword = mapping_back[token]
