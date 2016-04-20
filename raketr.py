@@ -134,7 +134,6 @@ def getRake(text):
 	tokens = get_rakeweight_data(text)
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
-	# printScores(vertex_scores)
 
 	dic = sorted(vertex_scores.items(), key = operator.itemgetter(1), reverse = True)
 	num_words = len(vertex_scores)
@@ -156,7 +155,6 @@ def main(text, single = False):
 	tokens, mapping_back, stemmed_sentences = get_rakeweight_data(text)
 	vertex_scores = {} #key: token, #value: current score
 	getTokenWeight(vertex_scores, tokens)
-	# printScores(vertex_scores)
 
 	# iterates through TextRank algorithm until it converges
 	has_converged = False
@@ -177,7 +175,6 @@ def main(text, single = False):
 			break
 		counter += 1
 
-	# printScores(vertex_scores)
 	num_words = len(vertex_scores)
 	keywords = []
 	tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:24]
@@ -200,30 +197,6 @@ def main(text, single = False):
 
 if __name__ == '__main__':
 	text = "The presidential race is coming soon. Who do you think will win? It will be a close presidential race."
-	text = "The presidential race is coming soon. It will be a close presidential race."
-	text = '''Efficient discovery of grid services is essential for the success of
-grid computing. The standardization of grids based on web
-services has resulted in the need for scalable web service
-discovery mechanisms to be deployed in grids Even though UDDI
-has been the de facto industry standard for web-services
-discovery, imposed requirements of tight-replication among
-registries and lack of autonomous control has severely hindered
-its widespread deployment and usage. With the advent of grid
-computing the scalability issue of UDDI will become a roadblock
-that will prevent its deployment in grids. In this paper we present
-our distributed web-service discovery architecture, called DUDE
-(Distributed UDDI Deployment Engine). DUDE leverages DHT
-(Distributed Hash Tables) as a rendezvous mechanism between
-multiple UDDI registries. DUDE enables consumers to query
-multiple registries, still at the same time allowing organizations to
-have autonomous control over their registries.. Based on
-preliminary prototype on PlanetLab, we believe that DUDE
-architecture can support effective distribution of UDDI registries
-thereby making UDDI more robust and also addressing its scaling
-issues. Furthermore, The DUDE architecture for scalable
-distribution can be applied beyond UDDI to any Grid Service
-Discovery mechanism.'''
-
 	text = "Harold ate an apple. Harold did not realize it was a magic apple. If he had known it was magic, he would have ate the whole apple."
 	# text = "Information Retrieval is very fun. I learn a lot from the class. There is much to learn from information retrieval."
 	main(text)
