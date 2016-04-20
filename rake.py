@@ -8,6 +8,7 @@ import nltk.data
 import numpy as np
 import copy
 import operator
+import re
 
 damp = .85
 conv = .05 # value to check if weights converge
@@ -44,7 +45,9 @@ def initializePhrases(sentences, tokens):
 	for sent in sentences:
 		phrase = []
 		for token in sent:
-			if len(token) > 1 and token not in stopwords.words('english'):
+			if len(token) > 1 and token not in stopwords.words('english') and token.isalnum():
+				pattern = re.compile('[\W_]+')
+				token = pattern.sub('', token)
 				phrase.append(token)
 			else:
 				if len(phrase) > 0:
@@ -125,6 +128,7 @@ def getKeyphraseWeights(keyphrases, keywords):
 	for phrase in keyphrases:
 		key = ""
 		weight = 0
+		length = 0
 		for token in phrase:
 			if key == "":
 				key += token
@@ -132,7 +136,9 @@ def getKeyphraseWeights(keyphrases, keywords):
 				key += " " + token 
 			if token in keywords:
 				weight += keywords[token]
-		keyphrase_weights[key] = weight
+			length += 1
+
+		keyphrase_weights[key] = weight / length
 
 
 	return keyphrase_weights
@@ -202,7 +208,7 @@ def main(text):
 	comatrix, comatrix_count = initializeCoMatrix(keyphrases)
 	keyword_weights = getKeywordWeights(comatrix, comatrix_count)
 
-	# keyword_weights = reweightTR(keyword_weights, comatrix, comatrix_count, tokens) # THIS IS WHERE RAKE GETS REWEIGHTED
+	keyword_weights = reweightTR(keyword_weights, comatrix, comatrix_count, tokens) # THIS IS WHERE RAKE GETS REWEIGHTED
 																					# REMOVE TO GET RAKE VALUES
 	keyphrase_weights = getKeyphraseWeights(keyphrases, keyword_weights)
 	sorted_x = sorted(keyphrase_weights.items(), key=operator.itemgetter(1), reverse=True)
@@ -214,8 +220,8 @@ def main(text):
 			break
 		counter += 1
 		keywords.append(pair[0])
-		if pair[1] > 0:
-			print "KEYWORD: " + pair[0] + " WEIGHT: " + str(pair[1])
+		# if pair[1] > 0:
+		# 	print "KEYWORD: " + pair[0] + " WEIGHT: " + str(pair[1])
 
 	# print keywords
 	return keywords
