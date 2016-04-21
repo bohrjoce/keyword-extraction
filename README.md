@@ -14,7 +14,9 @@ Using the SemEval2010 dataset test part (92 documents). RAKE implemetation we be
 Improve keyphrase building by using Jaccard coefficient to remove keywords that are similar to others.
 
 #HowTo
-Please refer to evaluate_*.py to see how it works. In general, simply run evaluate_single.py (with one command line argument specifying the method to use, which can be: 'svd' or 'raketr' or 'cluster'; the same applies to keyphrases extraction) to evaluate single keyword extraction and evaluate_multiple.py for keyphrases extraction.
+We provided demo.py to toy around with the 3 algorithms. Simply put your text files in a single folder and input in your command line: python demo.py *algo* *folder_link* *type*; where algo is either svd, raketr or cluster, and type is either "single" or "phrases"
+
+For evaluation on dataset: please refer to evaluate_*.py to see how it works. In general, simply run evaluate_single.py (with one command line argument specifying the method to use, which can be: 'svd' or 'raketr' or 'cluster'; the same applies to keyphrases extraction) to evaluate single keyword extraction and evaluate_multiple.py for keyphrases extraction.
 
 python evaluate_{single, multiple}.py {svd, raketr, cluster}
 
