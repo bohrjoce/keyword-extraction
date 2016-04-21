@@ -177,7 +177,7 @@ def main(text, single = False):
 
   num_words = len(vertex_scores)
   keywords = []
-  tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:24]
+  tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:min(24, len(vertex_scores)/3)]
   keyword_weights = defaultdict(float)
   for tok, val in tok_max:
     keyword = mapping_back[tok]
@@ -190,7 +190,7 @@ def main(text, single = False):
   keyphrases,keyphrase_freq = get_keyphrases(keywords, stemmed_sentences)
   keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
   keyword_weights.update(keyphrase_weights)
-  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:15]
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights)/3)]
 
 #  print keywords
   return top_keywords

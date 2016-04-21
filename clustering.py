@@ -48,7 +48,7 @@ def kcluster(content, num_cluster = 6, num_key = 15, single = False):
   # for all words in keywords
   keyphrases_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
   keyword_weights.update(keyphrases_weights)
-  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:15]
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights)/3)]
 #  for keyword in top_keywords:
 #    print(keyword + ' '*(40-len(keyword)) + str(keyword_weights[keyword]))
   return top_keywords

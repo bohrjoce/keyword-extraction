@@ -51,12 +51,12 @@ def main():
     content = f.read()
     if method == 'svd':
       keywords = svd(content, 1, single)
-    elif method == 'textrake':
+    elif method == 'raketr':
       keywords = raketr.main(content, single)
     elif method == 'cluster':
       keywords = kcluster(content, 6, 15, single)
     else:
-      print('methods accepted: svd textrake cluster, please specify')
+      print('methods accepted: svd raketr cluster, please specify')
       exit(0)
     print('keyphrases found')
     print(keywords)

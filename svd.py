@@ -33,7 +33,7 @@ def svd_mat(mat, vocalst, map_back, C, num_of_comp = 3):
   sortidx = list(np.argsort(flst))
   sortidx.reverse()
   rlst = []
-  for i in range(0,25):
+  for i in range(0,min(25, len(sortidx))):
     token = vocalst[sortidx[i]]
     keyword = map_back[token]
     freq = C[token][token]
@@ -100,5 +100,5 @@ def svd(filename, num_of_comp = 3, single = False):
   keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
   keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
   keyword_weights.update(keyphrase_weights)
-  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:15]
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights))]
   return top_keywords
