@@ -177,7 +177,7 @@ def main(text, single = False):
 
   num_words = len(vertex_scores)
   keywords = []
-  tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:min(24, len(vertex_scores)/3)]
+  tok_max = sorted(vertex_scores.iteritems(), key=lambda x:-x[1])[:min(24, len(vertex_scores))]
   keyword_weights = defaultdict(float)
   for tok, val in tok_max:
     keyword = mapping_back[tok]
