@@ -12,6 +12,7 @@ Using the SemEval2010 dataset test part (92 documents). RAKE implemetation we be
 
 #TODO
 Improve keyphrase building by using Jaccard coefficient to remove keywords that are similar to others.
+For grading purpose, we're keeping the system as it is and will do further improvement after April 2016
 
 #HowTo
 We provided demo.py to toy around with the 3 algorithms. Simply put your text files in a single folder and input in your command line: python demo.py *algo* *folder_link* *type*; where algo is either svd, raketr or cluster, and type is either "single" or "phrases"
