@@ -100,5 +100,5 @@ def svd(filename, num_of_comp = 3, single = False):
   keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
   keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
   keyword_weights.update(keyphrase_weights)
-  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights))]
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights)/3)]
   return top_keywords
