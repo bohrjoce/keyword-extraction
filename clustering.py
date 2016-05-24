@@ -9,7 +9,7 @@ from postprocess import get_keyphrases
 from postprocess import get_keyphrase_weights
 from collections import defaultdict
 
-def kcluster(content, num_cluster = 6, num_key = 15, single = False):
+def kcluster(content, num_cluster = 6, num_key = 15, single = False, num_top = -1):
   # num_key is the number of keyword that we extract from a cluster
   # we can find the union of the extracted keys from each cluster
 
@@ -48,7 +48,9 @@ def kcluster(content, num_cluster = 6, num_key = 15, single = False):
   # for all words in keywords
   keyphrases_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
   keyword_weights.update(keyphrases_weights)
-  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights)/3)]
+  if num_top < 0:
+    num_top = len(keyword_weights)/3
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(num_top, len(keyword_weights))]
 #  for keyword in top_keywords:
 #    print(keyword + ' '*(40-len(keyword)) + str(keyword_weights[keyword]))
   return top_keywords

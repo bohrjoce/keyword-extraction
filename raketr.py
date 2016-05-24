@@ -149,7 +149,7 @@ def getRake(text):
   print rake_keywords
   return rake_keywords
 
-def main(text, single = False):
+def main(text, single = False, num_top = -1):
   text = text.lower()
 
   tokens, mapping_back, stemmed_sentences = get_rakeweight_data(text)
@@ -190,7 +190,9 @@ def main(text, single = False):
   keyphrases,keyphrase_freq = get_keyphrases(keywords, stemmed_sentences)
   keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
   keyword_weights.update(keyphrase_weights)
-  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights)/3)]
+  if num_top < 0:
+    num_top = len(keyphrase_weights)/3
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(num_top, len(keyword_weights))]
 
 #  print keywords
   return top_keywords
