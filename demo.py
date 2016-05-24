@@ -39,8 +39,11 @@ def main():
   method = str(sys.argv[1])
   fdir = str(sys.argv[2])
   single = False
-  if str(sys.argv[3]) == 'single':
+  num_top = -1
+  if (len(sys.argv) > 3) and (str(sys.argv[3]) == 'single'):
     single = True
+  if (len(sys.argv) > 4):
+    num_top = int(sys.argv[4])
   filenames = sorted(os.listdir(fdir))
 
   for filename in filenames:
@@ -50,11 +53,11 @@ def main():
     f = open(fdir + filename, 'r')
     content = f.read()
     if method == 'svd':
-      keywords = svd(content, 1, single)
+      keywords = svd(content, 1, single, num_top)
     elif method == 'raketr':
-      keywords = raketr.main(content, single)
+      keywords = raketr.main(content, single, num_top)
     elif method == 'cluster':
-      keywords = kcluster(content, 6, 15, single)
+      keywords = kcluster(content, 6, 15, single, num_top)
     else:
       print('methods accepted: svd raketr cluster, please specify')
       exit(0)

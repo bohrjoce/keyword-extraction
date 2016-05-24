@@ -87,7 +87,7 @@ def make_mat(lst):
     mat = np.concatenate((mat, v), axis = 1)
   return mat, vocalst
 
-def svd(filename, num_of_comp = 3, single = False):
+def svd(filename, num_of_comp = 3, single = False, num_top = -1):
 #interface with the evaluation script
 #filename is the input document string as in process_file function
 #get document matrix and associated data structures
@@ -100,5 +100,7 @@ def svd(filename, num_of_comp = 3, single = False):
   keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
   keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
   keyword_weights.update(keyphrase_weights)
-  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(15, len(keyword_weights)/3)]
+  if num_top < 0:
+    num_top = len(keyphrase_weights)/3
+  top_keywords = sorted(keyword_weights, key=keyword_weights.get, reverse=True)[:min(num_top, len(keyword_weights))]
   return top_keywords
