@@ -1,5 +1,6 @@
 
 import nltk.data
+import random
 #tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 from nltk.stem import WordNetLemmatizer
 from collections import Counter
@@ -94,8 +95,11 @@ def svd(filename, num_of_comp = 3, single = False, num_top = -1):
   tokens, data, map_back, postprocess_sentences, C = process_file(filename)
   #perform svd
   keywords, keyword_weights = svd_mat(data, tokens, map_back, C, num_of_comp)
-  if single:
-    return keywords
+  if single:  
+    keywords = set(keywords)
+    if (num_top < 0):
+      num_top = len(keywords)
+    return random.sample(keywords, min(len(keywords), num_top))
   # combine into multiple keywords
   keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
   keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)

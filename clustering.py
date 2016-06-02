@@ -3,6 +3,7 @@
 from sklearn import cluster
 import numpy as np
 import nltk
+import random
 import os
 from feature_extract import get_rakeweight_data
 from postprocess import get_keyphrases
@@ -41,7 +42,10 @@ def kcluster(content, num_cluster = 6, num_key = 15, single = False, num_top = -
 
   keywords = list(set(keywords))
   if single:
-    return keywords
+    keywords = set(keywords)
+    if (num_top < 0):
+      num_top = len(keywords)
+    return random.sample(keywords, min(len(keywords), num_top))
   # get keyphrases
   keyphrases,keyphrase_freq = get_keyphrases(keywords, postprocess_sentences)
   # keyphrases_weights = sum keyword_weights[word] / total_words

@@ -8,6 +8,7 @@ from feature_extract import stem_sen, remove_non_nva_sen
 import nltk.data
 import numpy as np
 import copy
+import random
 import operator
 from postprocess import get_keyphrases
 from postprocess import get_keyphrase_weights
@@ -185,7 +186,10 @@ def main(text, single = False, num_top = -1):
     keyword_weights[keyword] += val
 
   if single:
-    return keywords
+    keywords = set(keywords)
+    if (num_top < 0):
+      num_top = len(keywords)
+    return random.sample(keywords, min(len(keywords), num_top))
   # construct multiple keywords
   keyphrases,keyphrase_freq = get_keyphrases(keywords, stemmed_sentences)
   keyphrase_weights = get_keyphrase_weights(keyphrases, keyword_weights, keyphrase_freq)
